@@ -279,6 +279,21 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 		}
 	}
 
+	if (channelId == 1006) {
+		proxyChannelDataEventInfo ev;
+		UINT64 server_channel_id;
+
+		ev.channel_id = channelId;
+		ev.channel_name = channel_name;
+		ev.data = data;
+		ev.data_len = size;
+		ev.flags = flags;
+		ev.total_size = totalSize;
+
+		if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
+			return FALSE;
+	}
+
 	return client_receive_channel_data_original(instance, channelId, data, size, flags, totalSize);
 }
 
