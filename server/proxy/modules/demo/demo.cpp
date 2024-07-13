@@ -34,7 +34,6 @@ static BOOL demo_filter_keyboard_event(proxyData* pdata, void* param)
 	if (event_data == NULL)
 		return FALSE;
 
-
 	/*
 	if (event_data->rdp_scan_code == RDP_SCANCODE_KEY_B)
 	{
