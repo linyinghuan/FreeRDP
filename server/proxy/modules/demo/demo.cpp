@@ -181,6 +181,13 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		else if (msgType == CB_FORMAT_DATA_RESPONSE) {
 			if (clientformatID == CF_UNICODETEXT ) {
 				std::wcout << s->pointer <<std::endl;
+
+
+				LPSTR lpCopyA;
+				if (ConvertFromUnicode(CP_UTF8, 0, (LPCWSTR)s->pointer, -1, &lpCopyA, 0, NULL, NULL) < 1)
+					return NULL;
+				std::cout << "cliboard_filter_server_Event C++ demo plugin: CF_UNICODETEXT:" << lpCopyA<< std::endl;
+
 			}
 			else if (clientformatID == CB_FORMAT_TEXTURILIST ) {
 				FILEDESCRIPTORW* file_descriptor_array;
@@ -262,6 +269,12 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 		else if (msgType == CB_FORMAT_DATA_RESPONSE) {
 			if (serverformatID == CF_UNICODETEXT ) {
 				std::wcout << s->pointer <<std::endl;
+
+				LPSTR lpCopyA;
+				if (ConvertFromUnicode(CP_UTF8, 0, (LPCWSTR)(s->pointer), -1, &lpCopyA, 0, NULL, NULL) < 1)
+					return NULL;
+				std::cout << "cliboard_filter_client_Event C++ demo plugin: CF_UNICODETEXT:" << lpCopyA<< std::endl;
+
 			}
 			else if (serverformatID == CB_FORMAT_TEXTURILIST ) {
 				FILEDESCRIPTORW* file_descriptor_array;
