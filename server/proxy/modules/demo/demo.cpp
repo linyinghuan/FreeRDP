@@ -194,15 +194,20 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 				UINT32 file_descriptor_count;
 				auto result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
+				std::cout << "cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << result<< std::endl;
 				if (result == 0 && file_descriptor_count > 0) {
 					LPSTR lpFileNameA;
-					if (ConvertFromUnicode(CP_UTF8, 0, file_descriptor_array->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-						return NULL;
-					std::cout << "cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << lpFileNameA<< std::endl;
+					std::cout << "cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:" << std::endl;
+
+					for (int i = 0; i< file_descriptor_count; i++) {
+						if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+							return NULL;
+						std::cout << "" << lpFileNameA<< std::endl;
+					}
+
+					std::cout << "end"<< std::endl;
 
 				}
-
-				std::cout << "cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << result<< std::endl;
 			}
 			std::cout << "C++ demo plugin: CB_FORMAT_DATA_RESPONSE..." << std::endl;
 		}
@@ -281,14 +286,20 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 				UINT32 file_descriptor_count;
 				auto result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
+				std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << result<< std::endl;
 				if (result == 0 && file_descriptor_count > 0) {
 					LPSTR lpFileNameA;
-					if (ConvertFromUnicode(CP_UTF8, 0, file_descriptor_array->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-						return NULL;
-					std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << lpFileNameA<< std::endl;
+					std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:" << std::endl;
+
+					for (int i = 0; i< file_descriptor_count; i++) {
+						if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+							return NULL;
+						std::cout << "" << lpFileNameA<< std::endl;
+					}
+
+					std::cout << "end"<< std::endl;
 
 				}
-				std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << result<< std::endl;
 			}
 			std::cout << "C++ demo plugin: CB_FORMAT_DATA_RESPONSE..." << std::endl;
 		}
