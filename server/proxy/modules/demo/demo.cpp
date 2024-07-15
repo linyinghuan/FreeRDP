@@ -131,7 +131,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
 	UINT64 server_channel_id;
 
-	if (pev->channel_id == 1006) {
+	if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
 
 		if (pev->flags & CHANNEL_FLAG_FIRST)
 		{
@@ -224,7 +224,8 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
 	UINT64 server_channel_id;
 
-	if (pev->channel_id == 1006) {
+	//if (pev->channel_id == 1006)
+	if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
 
 		if (pev->flags & CHANNEL_FLAG_FIRST)
 		{

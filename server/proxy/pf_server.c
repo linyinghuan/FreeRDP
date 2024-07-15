@@ -229,7 +229,10 @@ static BOOL pf_server_receive_channel_data_hook(freerdp_peer* peer, UINT16 chann
 	}
 
 
-	if (channelId == 1006) {
+	//if (channelId == 1006)
+
+	if ( 0 == strncmp(channel_name, "cliprdr", strlen("cliprdr") ))
+	{
 		proxyChannelDataEventInfo ev;
 
 		ev.channel_id = channelId;

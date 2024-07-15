@@ -279,7 +279,9 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 		}
 	}
 
-	if (channelId == 1006) {
+	//if (channelId == 1006)
+	if ( 0 == strncmp(channel_name, "cliprdr", strlen("cliprdr") ))
+	{
 		proxyChannelDataEventInfo ev;
 		UINT64 server_channel_id;
 
