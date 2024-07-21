@@ -169,13 +169,16 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		if (Stream_GetRemainingLength(s) < dataLen)
 			return true;
 
+		printf("cliboard_filter_server_Event Type: %d - Flags:%#x - len:%d\n", msgType, msgFlags, dataLen);
 		if (msgType == CB_FORMAT_DATA_REQUEST) {
 
 			if (Stream_GetRemainingLength(s) >= 4) {
 				UINT32 formatID;
 				Stream_Read_UINT32(s, formatID);
 				serverformatID = formatID;
-				std::cout << "C++ demo plugin: CB_FORMAT_DATA_REQUEST..." << serverformatID << std::endl;
+				std::cout << "C++ demo plugn: CB_FORMAT_DATA_REQUEST..." << serverformatID << std::endl;
+
+				printf("format id:%#x\n", formatID);
 			}
 		}
 		else if (msgType == CB_FORMAT_DATA_RESPONSE) {
@@ -189,7 +192,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 				std::cout << "cliboard_filter_server_Event C++ demo plugin: CF_UNICODETEXT:" << lpCopyA<< std::endl;
 
 			}
-			else if (clientformatID == CB_FORMAT_TEXTURILIST ) {
+			else if (clientformatID == CB_FORMAT_TEXTURILIST  || clientformatID == 0xc07d) {
 				FILEDESCRIPTORW* file_descriptor_array;
 				UINT32 file_descriptor_count;
 				auto result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
@@ -260,6 +263,7 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 		Stream_Read_UINT16(s, msgFlags);
 		Stream_Read_UINT32(s, dataLen);
 
+		printf("cliboard_filter_client_Event Type: %d - Flags:%#x - len:%d\n", msgType, msgFlags, dataLen);
 		if (Stream_GetRemainingLength(s) < dataLen)
 			return true;
 
@@ -270,6 +274,8 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 				Stream_Read_UINT32(s, formatID);
 				clientformatID = formatID;
 				std::cout << "C++ demo plugin: CB_FORMAT_DATA_REQUEST..." << clientformatID << std::endl;
+
+				printf("format id:%#x\n", formatID);
 			}
 		}
 		else if (msgType == CB_FORMAT_DATA_RESPONSE) {
@@ -283,6 +289,26 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 
 			}
 			else if (serverformatID == CB_FORMAT_TEXTURILIST ) {
+				FILEDESCRIPTORW* file_descriptor_array;
+				UINT32 file_descriptor_count;
+				auto result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
+
+				std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST..." << result<< std::endl;
+				if (result == 0 && file_descriptor_count > 0) {
+					LPSTR lpFileNameA;
+					std::cout << "cliboard_filter_client_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:" << std::endl;
+
+					for (int i = 0; i< file_descriptor_count; i++) {
+						if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+							return NULL;
+						std::cout << "" << lpFileNameA<< std::endl;
+					}
+
+					std::cout << "end"<< std::endl;
+
+				}
+			}
+			else if (serverformatID == 0xc07d ) {
 				FILEDESCRIPTORW* file_descriptor_array;
 				UINT32 file_descriptor_count;
 				auto result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
@@ -323,8 +349,8 @@ BOOL proxy_module_entry_point(proxyPluginsManager* plugins_manager)
 {
 	g_plugins_manager = plugins_manager;
 
-	demo_plugin.MouseEvent = demo_filter_mouse_event;
-	demo_plugin.KeyboardEvent = demo_filter_keyboard_event;
+	//demo_plugin.MouseEvent = demo_filter_mouse_event;
+	//demo_plugin.KeyboardEvent = demo_filter_keyboard_event;
 	demo_plugin.ServerChannelsInit = demo_server_channels_init;
 	demo_plugin.ClientChannelData = cliboard_filter_client_Event;
 	demo_plugin.ServerChannelData = cliboard_filter_server_Event;
