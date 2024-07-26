@@ -50,12 +50,12 @@ BOOL auditor_channel_event_reg(UINT32 mode, UINT32 type, AUDITOR_EVENT_CB callba
 
 	if(mode == AUDITOR_CLIENT) {
 		auditor_client_cb_tbl[type] = callback;
-	} else if(mode == AUDITOR_CLIENT) {
+	} else if(mode == AUDITOR_SERVER) {
 		auditor_server_cb_tbl[type] = callback;
 	} else {
 		WLog_INFO(TAG, "auditor_channel_event_reg: mode(%d) error\n", mode);
 		rtn = FALSE;		
 	}
 
-	return rtn
+	return rtn;
 }
