@@ -171,6 +171,23 @@ static BOOL pf_config_load_channels(wIniFile* ini, proxyConfig* config)
 		}
 	}
 
+	config->Auditor = CommandLineParseCommaSeparatedValues(
+	    pf_config_get_str(ini, "Channels", "Auditor"), &config->AuditorCount);
+
+	{
+		/* validate channel name length */
+		size_t i;
+
+		for (i = 0; i < config->AuditorCount; i++)
+		{
+			if (strlen(config->Auditor[i]) > CHANNEL_NAME_LEN)
+			{
+				WLog_ERR(TAG, "passthrough channel: %s: name too long!", config->Auditor[i]);
+				return FALSE;
+			}
+		}
+	}
+
 	return TRUE;
 }
 

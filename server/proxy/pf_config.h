@@ -60,6 +60,9 @@ struct proxy_config
 	BOOL RemoteApp;
 	char** Passthrough;
 	size_t PassthroughCount;
+	char** Auditor;
+	size_t AuditorCount;
+
 
 	/* clipboard specific settings */
 	BOOL TextOnly;

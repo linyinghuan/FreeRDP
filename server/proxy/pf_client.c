@@ -279,21 +279,23 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 		}
 	}
 
-	//if (channelId == 1006)
-	if ( 0 == strncmp(channel_name, "cliprdr", strlen("cliprdr") ))
+	for (i = 0; i < config->AuditorCount; i++)
 	{
-		proxyChannelDataEventInfo ev;
-		UINT64 server_channel_id;
+		if (strncmp(channel_name, config->Auditor[i], CHANNEL_NAME_LEN) == 0)
+		{
+			proxyChannelDataEventInfo ev;
+			UINT64 server_channel_id;
 
-		ev.channel_id = channelId;
-		ev.channel_name = channel_name;
-		ev.data = data;
-		ev.data_len = size;
-		ev.flags = flags;
-		ev.total_size = totalSize;
+			ev.channel_id = channelId;
+			ev.channel_name = channel_name;
+			ev.data = data;
+			ev.data_len = size;
+			ev.flags = flags;
+			ev.total_size = totalSize;
 
-		if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
-			return FALSE;
+			if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
+				return FALSE;
+		}
 	}
 
 	return client_receive_channel_data_original(instance, channelId, data, size, flags, totalSize);
