@@ -30,6 +30,8 @@ add_library(${PLUGIN_NAME} MODULE
 	auditor_clip.h
 	auditor_kb.h
 	auditor_mouse.h	
+	tlog.c
+	tlog.h
 )
 
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")

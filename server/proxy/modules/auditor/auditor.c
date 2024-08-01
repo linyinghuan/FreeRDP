@@ -58,8 +58,11 @@ BOOL proxy_module_entry_point(proxyPluginsManager* plugins_manager)
 {
 	g_plugins_manager = plugins_manager;
 
-	//auditor_plugin.MouseEvent = auditor_mouse_event_handler;
-	//auditor_plugin.KeyboardEvent = auditor_keyboard_event_handler;
+
+	tlog_init("auditor.log", 1024 * 1024, 8, 0, 0);
+
+	auditor_plugin.MouseEvent = auditor_mouse_event_handler;
+	auditor_plugin.KeyboardEvent = auditor_keyboard_event_handler;
 	auditor_plugin.ServerChannelsInit = auditor_server_channels_init;
 	auditor_plugin.ClientChannelData = auditor_client_channel_handler;
 	auditor_plugin.ServerChannelData = auditor_server_channel_handler;

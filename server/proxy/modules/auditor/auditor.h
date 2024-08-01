@@ -3,6 +3,7 @@
 
 #include <errno.h>
 #include "modules_api.h"
+#include "tlog.h"
 
 #define TAG MODULE_TAG("auditor")
 
