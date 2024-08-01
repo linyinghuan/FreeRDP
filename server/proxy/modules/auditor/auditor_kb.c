@@ -4,7 +4,7 @@ int ctrl_flag = 0;
 int shift_flag = 0;
 int caps_flag = 0;
 
-BOOL auditor_keyboard_event_handler(proxyData* pdata, void* param)
+BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 {
 	proxyKeyboardEventInfo* event_data = (proxyKeyboardEventInfo*)param;
 	if (event_data == NULL)

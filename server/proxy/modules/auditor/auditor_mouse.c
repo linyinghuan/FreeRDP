@@ -1,6 +1,6 @@
 #include "auditor_mouse.h"
 
-BOOL auditor_mouse_event_handler(proxyData* pdata, void* param)
+BOOL auditor_mouse_event_handler(proxyData* pData, void* param)
 {
 	proxyMouseEventInfo* event_data = (proxyMouseEventInfo*)param;
 	if (event_data == NULL)
