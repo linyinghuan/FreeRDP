@@ -34,13 +34,18 @@ BOOL auditor_keyboard_event_handler(proxyData* pdata, void* param)
 		}	
 	}
 
+	if (event_data->flags & KBD_FLAGS_RELEASE) {
+		//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
+		tlog(TLOG_INFO, "[keyboard] input: %04X (ctrl=%d shift=%d caps=%d)\n", event_data->rdp_scan_code, ctrl_flag, shift_flag, caps_flag);
+	}
+
 	printf("input: %04X  flag: %04x --\n", event_data->rdp_scan_code, event_data->flags);
 	if (event_data->rdp_scan_code == RDP_SCANCODE_KEY_A || event_data->rdp_scan_code == RDP_SCANCODE_LMENU ||
 		event_data->rdp_scan_code == RDP_SCANCODE_DECIMAL || event_data->rdp_scan_code == RDP_SCANCODE_LCONTROL)
 	{
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
-			tlog(TLOG_INFO, "[keyboard] input: %04X (ctrl=%d shift=%d caps=%d)\n", event_data->rdp_scan_code, ctrl_flag, shift_flag, caps_flag);
+			printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
+			//tlog(TLOG_INFO, "[keyboard] input: %04X (ctrl=%d shift=%d caps=%d)\n", event_data->rdp_scan_code, ctrl_flag, shift_flag, caps_flag);
 		}
 	}
 	return TRUE;
