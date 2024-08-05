@@ -63,7 +63,6 @@ struct proxy_config
 	char** Auditor;
 	size_t AuditorCount;
 
-
 	/* clipboard specific settings */
 	BOOL TextOnly;
 	UINT32 MaxTextLength;

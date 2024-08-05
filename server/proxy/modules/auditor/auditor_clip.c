@@ -65,7 +65,6 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 
 		if ((formatList->numFormats * 36) != cap)
 		{
-			WLog_ERR(TAG, "Invalid short format list length: %" PRIuz "", cap);
 			return ERROR_INTERNAL_ERROR;
 		}
 
@@ -74,7 +73,6 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 
 		if (!formats)
 		{
-			WLog_ERR(TAG, "calloc failed!");
 			return CHANNEL_RC_NO_MEMORY;
 		}
 
@@ -106,7 +104,6 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 					formats[index].formatName = (char*)malloc(32 + 1);
 					if (!formats[index].formatName)
 					{
-						WLog_ERR(TAG, "malloc failed!");
 						error = CHANNEL_RC_NO_MEMORY;
 						goto error_out;
 					}
@@ -124,7 +121,7 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 					if (ConvertFromUnicode(CP_UTF8, 0, wszFormatName, 16,
 					                       &(formats[index].formatName), 0, NULL, NULL) < 1)
 					{
-						WLog_ERR(TAG, "failed to convert short clipboard format name");
+						printf("failed to convert short clipboard format name\n");
 						error = ERROR_INTERNAL_ERROR;
 						goto error_out;
 					}
@@ -157,7 +154,7 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 
 		if (!formats)
 		{
-			WLog_ERR(TAG, "calloc failed!");
+			printf("calloc failed!\n");
 			return CHANNEL_RC_NO_MEMORY;
 		}
 
@@ -181,7 +178,7 @@ static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList
 				if (ConvertFromUnicode(CP_UTF8, 0, wszFormatName, formatNameLength,
 				                       &(formats[index].formatName), 0, NULL, NULL) < 1)
 				{
-					WLog_ERR(TAG, "failed to convert long clipboard format name");
+					printf("failed to convert long clipboard format name\n");
 					error = ERROR_INTERNAL_ERROR;
 					goto error_out;
 				}
