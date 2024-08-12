@@ -109,6 +109,7 @@ typedef struct channel_data_event_info
 	size_t data_len;
 	size_t total_size;
 	UINT32 flags;
+	bool valid;
 } proxyChannelDataEventInfo;
 #define WINPR_PACK_POP
 #include <winpr/pack.h>

@@ -26,6 +26,38 @@
 static constexpr char plugin_name[] = "demo2";
 static constexpr char plugin_desc[] = "this is a test plugin2";
 
+enum RDPDR_PAKID_CG
+{
+	PAKID_CORE_SERVER_ANNOUNCE = 0x496E,
+	PAKID_CORE_CLIENTID_CONFIRM = 0x4343,
+	PAKID_CORE_CLIENT_NAME = 0x434E,
+	PAKID_CORE_DEVICELIST_ANNOUNCE = 0x4441,
+	PAKID_CORE_DEVICE_REPLY = 0x6472,
+	PAKID_CORE_DEVICE_IOREQUEST = 0x4952,
+	PAKID_CORE_DEVICE_IOCOMPLETION = 0x4943,
+	PAKID_CORE_SERVER_CAPABILITY = 0x5350,
+	PAKID_CORE_CLIENT_CAPABILITY = 0x4350,
+	PAKID_CORE_DEVICELIST_REMOVE = 0x444D,
+	PAKID_CORE_USER_LOGGEDON = 0x554C,
+	PAKID_PRN_CACHE_DATA = 0x5043,
+	PAKID_PRN_USING_XPS = 0x5543
+};
+
+/* DR_DEVICE_IOREQUEST.MajorFunction */
+enum IRP_MJ_CG
+{
+	IRP_MJ_CREATE = 0x00000000,
+	IRP_MJ_CLOSE = 0x00000002,
+	IRP_MJ_READ = 0x00000003,
+	IRP_MJ_WRITE = 0x00000004,
+	IRP_MJ_DEVICE_CONTROL = 0x0000000E,
+	IRP_MJ_QUERY_VOLUME_INFORMATION = 0x0000000A,
+	IRP_MJ_SET_VOLUME_INFORMATION = 0x0000000B,
+	IRP_MJ_QUERY_INFORMATION = 0x00000005,
+	IRP_MJ_SET_INFORMATION = 0x00000006,
+	IRP_MJ_DIRECTORY_CONTROL = 0x0000000C,
+	IRP_MJ_LOCK_CONTROL = 0x00000011
+};
 
 
 void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
@@ -322,9 +354,57 @@ wStream* client_data_in = NULL;
 CLIPRDR_FORMAT_LIST formatListServer = { 0 };
 static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
+
+
+	//if (!pev->valid)
+	//	return true;
+
 	UINT64 server_channel_id;
 
-	if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
+	if ( 0 == strncmp(pev->channel_name, "rdpdr", strlen("rdpdr") )) {
+		printf("---------------------cliboard_filter_server_Event Type: %s -----------------\n", pev->channel_name);
+
+		/*
+		if (pev->flags & CHANNEL_FLAG_FIRST)
+		{
+			if (server_data_in == NULL) {
+				server_data_in = Stream_New(NULL, pev->data_len);
+			}
+			Stream_SetPosition(server_data_in, 0);
+		}
+
+		wStream* data_in = server_data_in;
+		if (!Stream_EnsureRemainingCapacity(data_in, pev->data_len))
+		{
+			return true;
+		}
+
+		Stream_Write(data_in, pev->data, pev->data_len);
+		if (!(pev->flags & CHANNEL_FLAG_LAST)) {
+			return true;
+		}
+		Stream_SetPosition(data_in, 0);
+		auto s = (wStream*)data_in;
+
+		UINT16 msgRDPDRCTYP;
+		UINT16 msgRDPDRPAKID;
+		UINT32 DeviceId;
+		UINT32 CompletionId;
+		UINT32 IoStatus;
+		UINT error;
+
+		if (Stream_GetRemainingLength(s) < 8)
+			return true;
+
+		Stream_Read_UINT16(s, msgRDPDRCTYP); // Component (2 bytes)
+		Stream_Read_UINT16(s, msgRDPDRPAKID); // PacketId (2 bytes)
+		Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
+		Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
+		Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
+		*/
+
+	}
+	else if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
 
 		if (pev->flags & CHANNEL_FLAG_FIRST)
 		{
@@ -444,11 +524,166 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 CLIPRDR_FORMAT_LIST formatListClient = { 0 };
 static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
+
+
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
+	//if (!pev->valid)
+	//	return true;
 	UINT64 server_channel_id;
 
 	//if (pev->channel_id == 1006)
-	if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
+
+	if ( 0 == strncmp(pev->channel_name, "rdpdr", strlen("rdpdr") )) {
+		printf("cliboard_filter_client_Event Type: %s -----------------\n", pev->channel_name);
+
+
+		if (pev->flags & CHANNEL_FLAG_FIRST)
+		{
+			if (server_data_in == NULL) {
+				server_data_in = Stream_New(NULL, pev->data_len);
+			}
+			Stream_SetPosition(server_data_in, 0);
+		}
+
+		wStream* data_in = server_data_in;
+		if (!Stream_EnsureRemainingCapacity(data_in, pev->data_len))
+		{
+			return true;
+		}
+
+		Stream_Write(data_in, pev->data, pev->data_len);
+		if (!(pev->flags & CHANNEL_FLAG_LAST)) {
+			return true;
+		}
+		Stream_SetPosition(data_in, 0);
+		auto s = (wStream*)data_in;
+
+
+		if (Stream_GetRemainingLength(s) < 4)
+			return true;
+
+		UINT16 component;
+		UINT16 packetId;
+		UINT32 deviceId;
+		UINT32 status;
+		UINT error = ERROR_INVALID_DATA;
+
+		Stream_Read_UINT16(s, component); /* Component (2 bytes) */
+		Stream_Read_UINT16(s, packetId);  /* PacketId (2 bytes) */
+		if (component == 0x4472 /*RDPDR_CTYP_CORE*/) {
+
+			switch (packetId)
+			{
+				case PAKID_CORE_SERVER_ANNOUNCE:
+
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_SERVER_ANNOUNCE\n" );
+				}
+
+					break;
+
+				case PAKID_CORE_SERVER_CAPABILITY:
+
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_SERVER_CAPABILITY\n" );
+				}
+					break;
+
+				case PAKID_CORE_CLIENTID_CONFIRM:
+
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_CLIENTID_CONFIRM\n" );
+				}
+					break;
+
+				case PAKID_CORE_USER_LOGGEDON:
+
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_USER_LOGGEDON\n" );
+				}
+
+					break;
+
+				case PAKID_CORE_DEVICE_REPLY:
+
+
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_DEVICE_REPLY\n" );
+				}
+					break;
+
+				case PAKID_CORE_DEVICE_IOREQUEST:
+				{
+					printf("cliboard_filter_client_Event  PAKID_CORE_DEVICE_IOREQUEST\n" );
+					UINT32 DeviceId;
+					UINT32 FileId;
+					UINT32 CompletionId;
+					UINT32 MajorFunction;
+					UINT32 MinorFunction;
+
+
+					if (Stream_GetRemainingLength(s) < 20)
+						return true;
+
+					Stream_Read_UINT32(s, DeviceId); /* DeviceId (4 bytes) */
+
+					Stream_Read_UINT32(s, FileId);        /* FileId (4 bytes) */
+					Stream_Read_UINT32(s, CompletionId);  /* CompletionId (4 bytes) */
+					Stream_Read_UINT32(s, MajorFunction); /* MajorFunction (4 bytes) */
+					Stream_Read_UINT32(s, MinorFunction); /* MinorFunction (4 bytes) */
+					printf("cliboard_filter_client_Event MajorFunction: 0x%x -----------------\n", MajorFunction);
+
+					if (MajorFunction == IRP_MJ_CREATE) {
+						UINT32 FileId;
+						//DRIVE_FILE* file;
+						BYTE Information;
+						UINT32 FileAttributes;
+						UINT32 SharedAccess;
+						UINT32 DesiredAccess;
+						UINT32 CreateDisposition;
+						UINT32 CreateOptions;
+						UINT32 PathLength;
+						UINT64 allocationSize;
+						const WCHAR* path;
+
+						if (Stream_GetRemainingLength(s) < 6 * 4 + 8)
+							return true;
+
+						Stream_Read_UINT32(s, DesiredAccess);
+						Stream_Read_UINT64(s, allocationSize);
+						Stream_Read_UINT32(s, FileAttributes);
+						Stream_Read_UINT32(s, SharedAccess);
+						Stream_Read_UINT32(s, CreateDisposition);
+						Stream_Read_UINT32(s, CreateOptions);
+						Stream_Read_UINT32(s, PathLength);
+
+						if (Stream_GetRemainingLength(s) < PathLength)
+							return ERROR_INVALID_DATA;
+
+						path = (const WCHAR*)Stream_Pointer(s);
+
+						LPSTR lpFileNameA;
+						if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+								return NULL;
+
+						printf("=========path:[%s]\n", lpFileNameA);
+					}
+				}
+					break;
+
+				default:
+				{
+					printf("cliboard_filter_client_Event  default invalid\n" );
+				}
+					break;
+			}
+
+
+
+		}
+
+	}
+	else if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
 
 		if (pev->flags & CHANNEL_FLAG_FIRST)
 		{
