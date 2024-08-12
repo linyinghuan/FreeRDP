@@ -59,7 +59,12 @@ enum IRP_MJ_CG
 	IRP_MJ_LOCK_CONTROL = 0x00000011
 };
 
-
+/* DR_DEVICE_IOREQUEST.MinorFunction */
+enum IRP_MN_CG
+{
+	IRP_MN_QUERY_DIRECTORY = 0x00000001,
+	IRP_MN_NOTIFY_CHANGE_DIRECTORY = 0x00000002
+};
 void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 {
 	UINT index = 0;
@@ -352,6 +357,8 @@ wStream* client_data_in = NULL;
 
 
 CLIPRDR_FORMAT_LIST formatListServer = { 0 };
+UINT32 g_FsInformationClass;
+bool g_need = false;
 static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
 
@@ -364,7 +371,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	if ( 0 == strncmp(pev->channel_name, "rdpdr", strlen("rdpdr") )) {
 		printf("---------------------cliboard_filter_server_Event Type: %s -----------------\n", pev->channel_name);
 
-		/*
+
 		if (pev->flags & CHANNEL_FLAG_FIRST)
 		{
 			if (server_data_in == NULL) {
@@ -386,6 +393,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		Stream_SetPosition(data_in, 0);
 		auto s = (wStream*)data_in;
 
+
 		UINT16 msgRDPDRCTYP;
 		UINT16 msgRDPDRPAKID;
 		UINT32 DeviceId;
@@ -396,13 +404,171 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		if (Stream_GetRemainingLength(s) < 8)
 			return true;
 
+		if (!g_need)
+			return true;
+
 		Stream_Read_UINT16(s, msgRDPDRCTYP); // Component (2 bytes)
 		Stream_Read_UINT16(s, msgRDPDRPAKID); // PacketId (2 bytes)
 		Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 		Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 		Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
-		*/
 
+		UINT32 totalLength;
+		UINT32 Length;
+		UINT32 NextEntryOffset;;
+		UINT32 FileIndex;
+		UINT32 CreationTime;
+		UINT32 CreationTime2;
+		UINT32 LastAccessTime;
+		UINT32 LastAccessTime2;
+		UINT32 LastWriteTime;
+		UINT32 LastWriteTime2;
+		UINT32 ChangeTime;
+		UINT32 ChangeTime2;
+		UINT32 EndOfFile;
+		UINT32 EndOfFile2;
+		UINT32 AllocationSize;
+		UINT32 AllocationSize2;
+		UINT32 FileAttributes;
+		WCHAR* path;
+		UINT32 EaSize;
+		UINT32 ShortNameLength;
+				LPSTR lpFileNameA;
+
+		g_need = false;
+		switch (g_FsInformationClass)
+		{
+			case FileDirectoryInformation:
+
+
+				Stream_Read_UINT32(s, totalLength); /* Length */
+				Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
+				Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
+				Stream_Read_UINT32(s,
+				                    CreationTime); /* CreationTime */
+				Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime); /* LastAccessTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime2); /* LastAccessTime */
+				Stream_Read_UINT32(s,
+				                    LastWriteTime); /* LastWriteTime */
+				Stream_Read_UINT32(s,
+				                    LastWriteTime2); /* LastWriteTime */
+				Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
+				Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
+				Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
+				Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
+				Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
+				Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
+				Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
+				Stream_Read_UINT32(s, Length);                   /* FileNameLength */
+
+
+				path = (WCHAR*)Stream_Pointer(s);
+
+
+				if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+					return NULL;
+
+				printf("=========path:[%s]\n", lpFileNameA);
+				break;
+
+			case FileFullDirectoryInformation:
+				Stream_Read_UINT32(s, totalLength); /* Length */
+				Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
+				Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
+				Stream_Read_UINT32(s,
+						    CreationTime); /* CreationTime */
+				Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime); /* LastAccessTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime2); /* LastAccessTime */
+				Stream_Read_UINT32(s,
+						    LastWriteTime); /* LastWriteTime */
+				Stream_Read_UINT32(s,
+						    LastWriteTime2); /* LastWriteTime */
+				Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
+				Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
+				Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
+				Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
+				Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
+				Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
+				Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
+				Stream_Read_UINT32(s, Length);                   /* FileNameLength */
+
+				Stream_Read_UINT32(s, EaSize);                                /* EaSize */
+
+				path = (WCHAR*)Stream_Pointer(s);
+
+
+				if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+					return NULL;
+
+				printf("=========path:[%s]\n", lpFileNameA);
+				break;
+
+			case FileBothDirectoryInformation:
+
+
+				Stream_Read_UINT32(s, totalLength); /* Length */
+				Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
+				Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
+				Stream_Read_UINT32(s,
+						    CreationTime); /* CreationTime */
+				Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime); /* LastAccessTime */
+				Stream_Read_UINT32(
+				    s, LastAccessTime2); /* LastAccessTime */
+				Stream_Read_UINT32(s,
+						    LastWriteTime); /* LastWriteTime */
+				Stream_Read_UINT32(s,
+						    LastWriteTime2); /* LastWriteTime */
+				Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
+				Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
+				Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
+				Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
+				Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
+				Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
+				Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
+				Stream_Read_UINT32(s, Length);                   /* FileNameLength */
+
+				Stream_Read_UINT32(s, EaSize);                                /* EaSize */
+
+				Stream_Read_UINT32(s, ShortNameLength);
+				Stream_Seek(s, 24);
+				//Stream_Zero(output, 24); /* ShortName */
+				path = (WCHAR*)Stream_Pointer(s);
+
+
+				if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+					return NULL;
+
+				printf("=========path:[%s]\n", lpFileNameA);
+				break;
+
+
+			case FileNamesInformation:
+
+				Stream_Read_UINT32(s, totalLength); /* Length */
+				Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
+				Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
+
+				Stream_Read_UINT32(s, Length);                   /* FileNameLength */
+				path = (WCHAR*)Stream_Pointer(s);
+
+
+				if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+					return NULL;
+
+				printf("=========path:[%s]\n", lpFileNameA);
+				break;
+
+			default:
+				break;
+		}
 	}
 	else if ( 0 == strncmp(pev->channel_name, "cliprdr", strlen("cliprdr") )) {
 
@@ -667,6 +833,46 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 								return NULL;
 
 						printf("=========path:[%s]\n", lpFileNameA);
+					}
+					else if (MajorFunction == IRP_MJ_DIRECTORY_CONTROL) {
+						printf("cliboard_filter_client_Event  IRP_MJ_DIRECTORY_CONTROL\n" );
+
+						switch (MinorFunction)
+						{
+						case IRP_MN_QUERY_DIRECTORY:
+						{
+							g_need = true;
+							const WCHAR* path;
+							//DRIVE_FILE* file;
+							BYTE InitialQuery;
+							UINT32 PathLength;
+							UINT32 FsInformationClass;
+
+							if (Stream_GetRemainingLength(s) < 32)
+								return ERROR_INVALID_DATA;
+
+							Stream_Read_UINT32(s, FsInformationClass);
+							Stream_Read_UINT8(s, InitialQuery);
+							Stream_Read_UINT32(s, PathLength);
+							Stream_Seek(s, 23); /* Padding */
+							path = (WCHAR*)Stream_Pointer(s);
+
+							g_FsInformationClass = FsInformationClass;
+
+							LPSTR lpFileNameA;
+							if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+								return NULL;
+
+							printf("=========path:[%s]\n", lpFileNameA);
+						}
+							break;
+
+						case IRP_MN_NOTIFY_CHANGE_DIRECTORY: /* TODO */
+							//return irp->Discard(irp);
+							break;
+						default:
+							break;
+						}
 					}
 				}
 					break;
