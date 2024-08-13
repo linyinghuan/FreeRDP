@@ -20,8 +20,8 @@ CODE_MAP code_map_info[] = {
 {RDP_SCANCODE_ESCAPE, "ESC", NULL},
 {RDP_SCANCODE_KEY_1, "1", "!"},
 {RDP_SCANCODE_KEY_2, "2", "@"},
-{RDP_SCANCODE_KEY_3, "3", "#"}，
-{RDP_SCANCODE_KEY_4, "4", "$"}，
+{RDP_SCANCODE_KEY_3, "3", "#"},
+{RDP_SCANCODE_KEY_4, "4", "$"},
 {RDP_SCANCODE_KEY_5, "5", "%"},
 {RDP_SCANCODE_KEY_6, "6", "^"},
 {RDP_SCANCODE_KEY_7, "7", "&"},
@@ -97,7 +97,7 @@ CODE_MAP code_map_info[] = {
 {RDP_SCANCODE_NUMPAD3, "3", "PAGE DOWN"},
 {RDP_SCANCODE_NUMPAD0, "0", "INSERT"},
 {RDP_SCANCODE_DECIMAL, ".", "DELETE"},
-}
+};
 
 BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 {
