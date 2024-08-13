@@ -6,7 +6,7 @@ int num_lock = 0;
 int alt_flag = 0;
 int caps_flag = 0;
 
-#define IS_EXT_CODE(code)
+#define IS_EXT_CODE(code) ((code) & 0x100)
 #define IS_NUM_CODE(code) (((code) >= 0x47) && ((code) <= 0x53))
 #define IS_AZ_CODE(code) ((((code) >= 0x10) && ((code) <= 0x19)) || (((code) >= 0x1E) && ((code) <= 0x26)) || (((code) >= 0x2C) && ((code) <= 0x32)))
 
