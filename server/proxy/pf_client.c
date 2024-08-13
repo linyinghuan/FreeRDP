@@ -270,6 +270,10 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 			ev.data = data;
 			ev.data_len = size;
 
+
+			ev.flags = flags;
+			ev.total_size = totalSize;
+
 			if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
 				return FALSE;
 
@@ -292,6 +296,7 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 			ev.data_len = size;
 			ev.flags = flags;
 			ev.total_size = totalSize;
+			ev.valid = true;
 
 			if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
 				return FALSE;
