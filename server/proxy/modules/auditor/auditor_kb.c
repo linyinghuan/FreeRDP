@@ -108,7 +108,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 	BOOL extend_code = FALSE;
 
 	if(0 == code_map_tbl_init) {
-		for(i = 0; i < sizeof(code_map_info); i++) {
+		for(i = 0; i < sizeof(code_map_info)/sizeof(CODE_MAP); i++) {
 			code_map_table[RDP_SCANCODE_CODE(code_map_info[i].code)] = &code_map_info[i];
 		}
 
