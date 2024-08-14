@@ -161,21 +161,10 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 
 	if (event_data->flags & KBD_FLAGS_RELEASE) {
 		char buf[1024] = {0};
-		char *pTmp = buf;
 
 		pCodeMap = code_map_table[RDP_SCANCODE_CODE(event_data->rdp_scan_code)];
 
 		if(pCodeMap){
-			sprintf(pTmp, "%s", "input: ");
-			pTmp + strlen("input: ");
-			if(ctrl_flag == 1) {
-				sprintf(pTmp, "%s", "ctrl + ");
-				pTmp + strlen("ctrl + ");
-			}
-			if(alt_flag == 1) {
-				sprintf(pTmp, "%s", "alt + ");
-				pTmp + strlen("alt + ");
-			}
 			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
 			if(IS_NUM_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code))) {
 				if(num_lock == 1 || IS_EXT_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code)))
@@ -189,9 +178,9 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 			}
 
 			if(extend_code && pCodeMap->ext_key)
-				sprintf(pTmp,"%s\n", pCodeMap->ext_key);
+				sprintf(buf,"input: %s%s%s\n", ctrl_flag?"ctrl + ":" ", alt_flag?"alt + ":" ", pCodeMap->ext_key);
 			else
-				sprintf(pTmp,"%s\n", pCodeMap->key);
+				sprintf(buf,"input: %s%s%s\n", ctrl_flag?"ctrl + ":" ", alt_flag?"alt + ":" ", pCodeMap->key);
 			printf("%s", buf);
 			//tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %04X\n", event_data->rdp_scan_code);			
 		}
