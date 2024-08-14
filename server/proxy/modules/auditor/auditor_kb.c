@@ -186,11 +186,12 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 				sprintf(buf,"%s\n", pCodeMap->ext_key);
 			else
 				sprintf(buf,"%s\n", pCodeMap->key);
+			printf("%s", buf);
 			//tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %04X\n", event_data->rdp_scan_code);			
 		}
 	}
 
-	printf("input: %04X  flag: %04x --\n", event_data->rdp_scan_code, event_data->flags);
+	//printf("input: %04X  flag: %04x --\n", event_data->rdp_scan_code, event_data->flags);
 	if (event_data->rdp_scan_code == RDP_SCANCODE_KEY_A || event_data->rdp_scan_code == RDP_SCANCODE_LMENU ||
 		event_data->rdp_scan_code == RDP_SCANCODE_DECIMAL || event_data->rdp_scan_code == RDP_SCANCODE_LCONTROL)
 	{
