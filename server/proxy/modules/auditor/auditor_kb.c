@@ -160,9 +160,16 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 
 
 	if (event_data->flags & KBD_FLAGS_RELEASE) {
+		char buf[1024] = {0};
+
 		pCodeMap = code_map_table[RDP_SCANCODE_CODE(event_data->rdp_scan_code)];
 
 		if(pCodeMap){
+			sprintf(buf, "%s", "input: ");
+			if(ctrl_flag == 1)
+				sprintf(buf, "%s", "ctrl + ");
+			if(alt_flag == 1)
+				sprintf(buf, "%s", "alt + ");
 			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
 			if(IS_NUM_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code))) {
 				if(num_lock == 1 || IS_EXT_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code)))
@@ -174,10 +181,11 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 				if (shift_flag)
 					extend_code = TRUE;
 			}
+
 			if(extend_code && pCodeMap->ext_key)
-				printf("input: %s\n", pCodeMap->ext_key);
+				sprintf(buf,"%s\n", pCodeMap->ext_key);
 			else
-				printf("input: %s\n", pCodeMap->key);
+				sprintf(buf,"%s\n", pCodeMap->key);
 			//tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %04X\n", event_data->rdp_scan_code);			
 		}
 	}
@@ -187,7 +195,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 		event_data->rdp_scan_code == RDP_SCANCODE_DECIMAL || event_data->rdp_scan_code == RDP_SCANCODE_LCONTROL)
 	{
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
+			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
 			//tlog(TLOG_INFO, "[keyboard] input: %04X (ctrl=%d shift=%d caps=%d)\n", event_data->rdp_scan_code, ctrl_flag, shift_flag, caps_flag);
 		}
 	}
