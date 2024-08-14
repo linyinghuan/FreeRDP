@@ -174,7 +174,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 			}
 			if(alt_flag == 1) {
 				sprintf(pTmp, "%s", "alt + ");
-				pTmp + strlen("alt + ")
+				pTmp + strlen("alt + ");
 			}
 			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
 			if(IS_NUM_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code))) {
