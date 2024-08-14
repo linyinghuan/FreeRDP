@@ -413,6 +413,11 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 		Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
 
+		if (IoStatus == STATUS_NO_MORE_FILES ) {
+			printf("---------------------cliboard_filter_server_Event  STATUS_NO_MORE_FILES -----------------\n");
+
+			return true;
+		}
 		UINT32 totalLength;
 		UINT32 Length;
 		UINT32 NextEntryOffset;;
@@ -432,8 +437,8 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		UINT32 FileAttributes;
 		WCHAR* path;
 		UINT32 EaSize;
-		UINT32 ShortNameLength;
-				LPSTR lpFileNameA;
+		UINT8 ShortNameLength;
+		LPSTR lpFileNameA;
 
 		g_need = false;
 		switch (g_FsInformationClass)
@@ -513,21 +518,20 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 
 				Stream_Read_UINT32(s, totalLength); /* Length */
+				if (totalLength == 0) {
+					printf("=========total length is 0, maybe MJ_Close\n");
+					return true;
+				}
 				Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
 				Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
-				Stream_Read_UINT32(s,
-						    CreationTime); /* CreationTime */
-				Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
-				Stream_Read_UINT32(
-				    s, LastAccessTime); /* LastAccessTime */
-				Stream_Read_UINT32(
-				    s, LastAccessTime2); /* LastAccessTime */
-				Stream_Read_UINT32(s,
-						    LastWriteTime); /* LastWriteTime */
-				Stream_Read_UINT32(s,
-						    LastWriteTime2); /* LastWriteTime */
-				Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
-				Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
+				Stream_Read_UINT32(s, CreationTime); /* CreationTime */
+				Stream_Read_UINT32(s, CreationTime2); /* CreationTime */
+				Stream_Read_UINT32(s, LastAccessTime); /* LastAccessTime */
+				Stream_Read_UINT32(s, LastAccessTime2); /* LastAccessTime */
+				Stream_Read_UINT32(s, LastWriteTime); /* LastWriteTime */
+				Stream_Read_UINT32(s, LastWriteTime2); /* LastWriteTime */
+				Stream_Read_UINT32(s, ChangeTime); /* ChangeTime */
+				Stream_Read_UINT32(s, ChangeTime2); /* ChangeTime */
 				Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
 				Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
 				Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
@@ -537,16 +541,25 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 				Stream_Read_UINT32(s, EaSize);                                /* EaSize */
 
-				Stream_Read_UINT32(s, ShortNameLength);
+				Stream_Read_UINT8(s, ShortNameLength);
 				Stream_Seek(s, 24);
 				//Stream_Zero(output, 24); /* ShortName */
 				path = (WCHAR*)Stream_Pointer(s);
+				{
+					if (Length < s->length) {
+						WCHAR* path2 = (WCHAR*)calloc(Length + 1, sizeof(WCHAR));
+						memcpy(path2, path, Length);
+
+						if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+							return true;
 
 
-				if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-					return NULL;
+						free(path2);
 
-				printf("=========path:[%s]\n", lpFileNameA);
+						printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
+						free(lpFileNameA);
+					}
+				}
 				break;
 
 
@@ -828,11 +841,21 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 
 						path = (const WCHAR*)Stream_Pointer(s);
 
-						LPSTR lpFileNameA;
-						if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-								return NULL;
+						{
+							if (PathLength < s->length) {
+								WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
+								memcpy(path2, path, PathLength);
+								LPSTR lpFileNameA;
+								if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+									return true;
 
-						printf("=========path:[%s]\n", lpFileNameA);
+
+								free(path2);
+
+								printf("=========IRP_MJ_CREATE path:[%s]\n", lpFileNameA);
+								free(lpFileNameA);
+							}
+						}
 					}
 					else if (MajorFunction == IRP_MJ_DIRECTORY_CONTROL) {
 						printf("cliboard_filter_client_Event  IRP_MJ_DIRECTORY_CONTROL\n" );
@@ -859,11 +882,22 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 
 							g_FsInformationClass = FsInformationClass;
 
-							LPSTR lpFileNameA;
-							if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-								return NULL;
 
-							printf("=========path:[%s]\n", lpFileNameA);
+							{
+								if (PathLength < s->length) {
+									WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
+									memcpy(path2, path, PathLength);
+									LPSTR lpFileNameA;
+									if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+										return true;
+
+
+									free(path2);
+
+									printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
+									free(lpFileNameA);
+								}
+							}
 						}
 							break;
 
