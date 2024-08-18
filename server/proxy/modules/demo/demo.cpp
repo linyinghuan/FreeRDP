@@ -359,6 +359,16 @@ wStream* client_data_in = NULL;
 CLIPRDR_FORMAT_LIST formatListServer = { 0 };
 UINT32 g_FsInformationClass;
 bool g_need = false;
+
+#include <map>
+#include <string>
+#include <list>
+using std::map;
+using std::string;
+using std::list;
+map<string, list<string> > g_rdpdrpath;
+list<string> g_rdpdrpathnew;
+string g_newPath;
 static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
 
@@ -416,6 +426,36 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		if (IoStatus == STATUS_NO_MORE_FILES ) {
 			printf("---------------------cliboard_filter_server_Event  STATUS_NO_MORE_FILES -----------------\n");
 
+			if (g_rdpdrpath.find(g_newPath) != g_rdpdrpath.end()) {
+				printf("---------------------cliboard_filter_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
+
+
+				for(list<string>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
+					bool bExist = false;
+
+					for(list<string>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
+						if (*ita == *itb) {
+							bExist = true;
+							break;
+						}
+					}
+
+
+					if (!bExist) {
+						printf("---------------------cliboard_filter_server_Event [%s] is upload-----------------\n", itb->c_str());
+					}
+
+				}
+
+			}
+			else {
+				for(list<string>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
+					printf("---------------------cliboard_filter_server_Event [%s] is upload (new)-----------------\n", itb->c_str());
+
+
+				}
+			}
+			g_rdpdrpath[g_newPath] = g_rdpdrpathnew;
 			return true;
 		}
 		UINT32 totalLength;
@@ -557,6 +597,10 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 						free(path2);
 
 						printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
+
+						g_rdpdrpathnew.push_back(lpFileNameA);
+
+
 						free(lpFileNameA);
 					}
 				}
@@ -895,7 +939,15 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 									free(path2);
 
 									printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
+
+									if (strlen(lpFileNameA) > 0) {
+										g_newPath = lpFileNameA;
+										g_rdpdrpathnew.clear();
+									}
+
 									free(lpFileNameA);
+
+
 								}
 							}
 						}
