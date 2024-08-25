@@ -19,6 +19,15 @@
 
 #include <iostream>
 
+#include <map>
+#include <string>
+#include <list>
+#include <tuple>
+using std::string;
+using std::map;
+using std::list;
+using std::tuple;
+
 #include "modules_api.h"
 
 #define TAG MODULE_TAG("demo")
@@ -358,16 +367,26 @@ wStream* client_data_in = NULL;
 
 CLIPRDR_FORMAT_LIST formatListServer = { 0 };
 UINT32 g_FsInformationClass;
+
+
 bool g_need = false;
 
-#include <map>
-#include <string>
-#include <list>
-using std::map;
-using std::string;
-using std::list;
-map<string, list<string> > g_rdpdrpath;
-list<string> g_rdpdrpathnew;
+bool g_createNewFileNeed = false;
+string g_createNewFilePath;
+
+UINT32 g_createNewFileAttributes;
+
+class FileBriefInfo {
+public:
+	string m_path;
+	int m_isDir;
+	bool operator==(const FileBriefInfo& b) const {
+		return m_path == b.m_path;
+	}
+};
+
+map<string, list<FileBriefInfo> > g_rdpdrpath;
+list<FileBriefInfo> g_rdpdrpathnew;
 string g_newPath;
 static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 	auto pev = static_cast<proxyChannelDataEventInfo*>(context);
@@ -414,14 +433,75 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		if (Stream_GetRemainingLength(s) < 8)
 			return true;
 
-		if (!g_need)
-			return true;
-
 		Stream_Read_UINT16(s, msgRDPDRCTYP); // Component (2 bytes)
 		Stream_Read_UINT16(s, msgRDPDRPAKID); // PacketId (2 bytes)
 		Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 		Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 		Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
+		printf("---------------------cliboard_filter_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
+
+
+		if (g_createNewFileNeed) {
+			g_createNewFileNeed = false;
+
+			if (IoStatus == 0) {
+
+				if (g_createNewFilePath == "" || g_createNewFilePath == "\\") {
+
+					printf("---------------------cliboard_filter_server_Event  file [%s]-----------------\n", g_createNewFilePath.c_str());
+					return true;
+				}
+
+
+				// Function to find the last
+				// character ch in str
+				size_t found = g_createNewFilePath.find_last_of('\\');
+				if (found != string::npos) {
+					string filePath = g_createNewFilePath.substr(found + 1);
+					string rootPath;
+					if (found > 0)
+						rootPath = g_createNewFilePath.substr(0, found - 1);
+					else
+						rootPath = "\\";
+
+					rootPath = rootPath + "*";
+					if(g_rdpdrpath.find(rootPath + "") != g_rdpdrpath.end()) {
+
+						for(list<FileBriefInfo>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
+							if (ita->m_path == filePath) {
+								if (ita->m_isDir) {
+
+									printf("--2-------------------cliboard_filter_server_Event  file [%s]-----------------\n", g_createNewFilePath.c_str());
+									return true;
+								}
+							}
+						}
+					}
+
+
+
+					if (g_createNewFileAttributes & 0x00000010) {
+						FileBriefInfo fileBriefInfo;
+						fileBriefInfo.m_path = filePath;
+						fileBriefInfo.m_isDir = 1;
+						g_rdpdrpath[rootPath].push_back(fileBriefInfo);
+					}
+					else {
+						FileBriefInfo fileBriefInfo;
+						fileBriefInfo.m_path = filePath;
+						fileBriefInfo.m_isDir = 0;
+						g_rdpdrpath[rootPath].push_back(fileBriefInfo);
+					}
+
+
+					printf("---------------------cliboard_filter_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
+
+				}
+			}
+		}
+
+		if (!g_need)
+			return true;
 
 		if (IoStatus == STATUS_NO_MORE_FILES ) {
 			printf("---------------------cliboard_filter_server_Event  STATUS_NO_MORE_FILES -----------------\n");
@@ -430,10 +510,10 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 				printf("---------------------cliboard_filter_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
 
 
-				for(list<string>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
+				for(list<FileBriefInfo>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
 					bool bExist = false;
 
-					for(list<string>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
+					for(list<FileBriefInfo>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
 						if (*ita == *itb) {
 							bExist = true;
 							break;
@@ -442,17 +522,15 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 
 					if (!bExist) {
-						printf("---------------------cliboard_filter_server_Event [%s] is upload-----------------\n", itb->c_str());
+						printf("---------------------cliboard_filter_server_Event [%s] is upload-----------------\n", itb->m_path.c_str());
 					}
 
 				}
 
 			}
 			else {
-				for(list<string>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
-					printf("---------------------cliboard_filter_server_Event [%s] is upload (new)-----------------\n", itb->c_str());
-
-
+				for(list<FileBriefInfo>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
+					printf("---------------------cliboard_filter_server_Event [%s] is upload (new)-----------------\n", itb->m_path.c_str());
 				}
 			}
 			g_rdpdrpath[g_newPath] = g_rdpdrpathnew;
@@ -598,7 +676,19 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 						printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
 
-						g_rdpdrpathnew.push_back(lpFileNameA);
+						printf("=========FileBothDirectoryInformation FileAttributes:[0x%x]\n", FileAttributes);
+
+						if (FileAttributes | 0x00000010) {
+							FileBriefInfo fileBriefInfo;
+							fileBriefInfo.m_path = lpFileNameA;
+							fileBriefInfo.m_isDir = 1;
+							g_rdpdrpathnew.push_back(fileBriefInfo);;
+						}else {
+							FileBriefInfo fileBriefInfo;
+							fileBriefInfo.m_path = lpFileNameA;
+							fileBriefInfo.m_isDir = 0;
+							g_rdpdrpathnew.push_back(fileBriefInfo);
+						}
 
 
 						free(lpFileNameA);
@@ -897,6 +987,14 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 								free(path2);
 
 								printf("=========IRP_MJ_CREATE path:[%s]\n", lpFileNameA);
+								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes);
+
+								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
+								if (CreateDisposition == 1 || CreateDisposition == 2) {
+									g_createNewFilePath = lpFileNameA;
+									g_createNewFileNeed = true;
+									g_createNewFileAttributes = FileAttributes;
+								}
 								free(lpFileNameA);
 							}
 						}
@@ -962,7 +1060,6 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 					}
 				}
 					break;
-
 				default:
 				{
 					printf("cliboard_filter_client_Event  default invalid\n" );
