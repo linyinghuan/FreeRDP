@@ -446,6 +446,9 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 			if (IoStatus == 0) {
 
+				printf("---------------------cliboard_filter_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
+
+				/*
 				if (g_createNewFilePath == "" || g_createNewFilePath == "\\") {
 
 					printf("---------------------cliboard_filter_server_Event  file [%s]-----------------\n", g_createNewFilePath.c_str());
@@ -457,6 +460,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 				// character ch in str
 				size_t found = g_createNewFilePath.find_last_of('\\');
 				if (found != string::npos) {
+
 					string filePath = g_createNewFilePath.substr(found + 1);
 					string rootPath;
 					if (found > 0)
@@ -496,7 +500,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 					printf("---------------------cliboard_filter_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
 
-				}
+				}*/
 			}
 		}
 
@@ -987,10 +991,10 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 								free(path2);
 
 								printf("=========IRP_MJ_CREATE path:[%s]\n", lpFileNameA);
-								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes);
+								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
-								if (CreateDisposition == 1 || CreateDisposition == 2) {
+								if ((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002) ) ) {
 									g_createNewFilePath = lpFileNameA;
 									g_createNewFileNeed = true;
 									g_createNewFileAttributes = FileAttributes;
