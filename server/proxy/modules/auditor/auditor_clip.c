@@ -10,6 +10,8 @@ __attribute__((constructor)) static int auditor_clip_init()
 {
 	auditor_channel_event_reg(AUDITOR_CLIENT, AUDITOR_EVENT_CLIPB, auditor_clip_client_event_handler);
 	auditor_channel_event_reg(AUDITOR_SERVER, AUDITOR_EVENT_CLIPB, auditor_clip_server_event_handler);
+
+	return 0;
 }
 
 static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
@@ -197,12 +199,12 @@ error_out:
 
 void auditor_clip_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
-	auditor_clip_event_handler(AUDITOR_CLIENT, pData, pEvent, AUDITOR_CTX_DATA *auditor_ctx);
+	auditor_clip_event_handler(AUDITOR_CLIENT, pData, pEvent, auditor_ctx);
 }
 
 void auditor_clip_server_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
-	auditor_clip_event_handler(AUDITOR_SERVER, pData, pEvent, AUDITOR_CTX_DATA *auditor_ctx);
+	auditor_clip_event_handler(AUDITOR_SERVER, pData, pEvent, auditor_ctx);
 }
 
 void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
@@ -238,7 +240,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		auditor_ctx->formatList.msgFlags = msgFlags;
 		auditor_ctx->formatList.dataLen = dataLen;
 		if ((error = cliprdr_read_format_list(s, &auditor_ctx->formatList, pData->ps->cliprdr->useLongFormatNames/*cliprdr->useLongFormatNames*/)) == CHANNEL_RC_OK) {
-			for (int i = 0; i< formatList.numFormats; i++) {
+			for (int i = 0; i< auditor_ctx->formatList.numFormats; i++) {
 				printf("-----format id:%#x\t %s\n", auditor_ctx->formatList.formats[i].formatId, auditor_ctx->formatList.formats[i].formatName);
 			}
 
