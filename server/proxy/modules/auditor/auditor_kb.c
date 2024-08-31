@@ -102,7 +102,7 @@ CODE_MAP code_map_info[] = {
 BOOL auditor_keyboard_event_handler(proxyData* pData, void* param, AUDITOR_CTX_DATA *auditor_ctx)
 {
 	static CODE_MAP *code_map_table[256] = {0};
-	static code_map_tbl_init = 0;
+	static int code_map_tbl_init = 0;
 	int i = 0;
 	CODE_MAP *pCodeMap = NULL;
 	BOOL extend_code = FALSE;
