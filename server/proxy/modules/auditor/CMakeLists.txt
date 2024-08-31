@@ -29,7 +29,8 @@ add_library(${PLUGIN_NAME} MODULE
 	auditor_channel.h
 	auditor_clip.h
 	auditor_kb.h
-	auditor_mouse.h	
+	auditor_mouse.h
+	auditor_rdpdr.c
 	tlog.c
 	tlog.h
 )
