@@ -49,9 +49,6 @@ static proxyPlugin auditor_plugin = {
 	NULL,                               /* ServerChannelsFree */
 	NULL,         						/* Session End */
 	NULL,                               /* KeyboardEvent */
-	NULL,                               /* MouseEvent */
-	NULL,                               /* ClientChannelData */
-	NULL,                               /* ServerChannelData */
 };
 
 BOOL proxy_module_entry_point(proxyPluginsManager* plugins_manager)

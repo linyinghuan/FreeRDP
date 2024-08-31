@@ -220,17 +220,17 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
-		return;
+		goto finish;
 	}
 	Stream_SetPosition(s, 0);
 	if (Stream_GetRemainingLength(s) < 8)
-		return;
+		goto finish;
 	Stream_Read_UINT16(s, msgType);
 	Stream_Read_UINT16(s, msgFlags);
 	Stream_Read_UINT32(s, dataLen);
 
 	if (Stream_GetRemainingLength(s) < dataLen)
-		return;
+		goto finish;
 
 	printf("cliboard_filter_server_Event Type: %d - Flags:%#x - len:%d\n", msgType, msgFlags, dataLen);
 	if (msgType == CB_FORMAT_LIST) {
@@ -265,7 +265,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		if (auditor_ctx->formatID == CF_UNICODETEXT ) {
 			LPSTR lpCopyA;
 			if (ConvertFromUnicode(CP_UTF8, 0, (LPCWSTR)s->pointer, -1, &lpCopyA, 0, NULL, NULL) < 1)
-				return NULL;
+				goto finish;
 			printf("cliboard_filter_server_Event C++ demo plugin: CF_UNICODETEXT:%s\n", lpCopyA);
 			tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy UNICODETEXT: %s\n", lpCopyA);
 
@@ -282,12 +282,14 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 
 				for (int i = 0; i< file_descriptor_count; i++) {
 					if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-						return NULL;
+						goto finish;
 					printf("%s\n", lpFileNameA);
 					tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy FILE: %s n", lpFileNameA);
 				}
 			}
 		}
 	}
+
+finish:
 	Stream_Free(s, TRUE);
 }

@@ -99,13 +99,20 @@ CODE_MAP code_map_info[] = {
 {RDP_SCANCODE_DECIMAL, ".", "DELETE"},
 };
 
-BOOL auditor_keyboard_event_handler(proxyData* pData, void* param, AUDITOR_CTX_DATA *auditor_ctx)
+BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 {
 	static CODE_MAP *code_map_table[256] = {0};
 	static int code_map_tbl_init = 0;
 	int i = 0;
 	CODE_MAP *pCodeMap = NULL;
 	BOOL extend_code = FALSE;
+	AUDITOR_CTX_DATA *auditor_ctx = NULL;
+
+	auditor_ctx = auditor_get_plugin_data(pdata);
+	if(NULL == auditor_ctx) {
+		printf("keyboard event without auditor ctx\n");
+		return TRUE;
+	}
 
 	if(0 == code_map_tbl_init) {
 		for(i = 0; i < sizeof(code_map_info)/sizeof(CODE_MAP); i++) {
