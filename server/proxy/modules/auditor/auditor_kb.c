@@ -99,7 +99,7 @@ CODE_MAP code_map_info[] = {
 {RDP_SCANCODE_DECIMAL, ".", "DELETE"},
 };
 
-BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
+BOOL auditor_keyboard_event_handler(proxyData* pData, void* param, AUDITOR_CTX_DATA *auditor_ctx)
 {
 	static CODE_MAP *code_map_table[256] = {0};
 	static code_map_tbl_init = 0;
@@ -121,40 +121,40 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 
 	if  (event_data->rdp_scan_code == RDP_SCANCODE_LCONTROL || event_data->rdp_scan_code == RDP_SCANCODE_RCONTROL) {
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			ctrl_flag = 0;
+			auditor_ctx->ctrl_flag = 0;
 		}
 		if (event_data->flags & KBD_FLAGS_DOWN) {
-			ctrl_flag = 1;
+			auditor_ctx->ctrl_flag = 1;
 		}		
 	}
 
 	if  (event_data->rdp_scan_code == RDP_SCANCODE_LMENU || event_data->rdp_scan_code == RDP_SCANCODE_RMENU) {
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			alt_flag = 0;
+			auditor_ctx->alt_flag = 0;
 		}
 		if (event_data->flags & KBD_FLAGS_DOWN) {
-			alt_flag = 1;
+			auditor_ctx->alt_flag = 1;
 		}		
 	}	
 
 	if  (event_data->rdp_scan_code == RDP_SCANCODE_LSHIFT || event_data->rdp_scan_code == RDP_SCANCODE_RSHIFT) {
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			shift_flag = 0;
+			auditor_ctx->shift_flag = 0;
 		}
 		if (event_data->flags & KBD_FLAGS_DOWN) {
-			shift_flag = 1;
+			auditor_ctx->shift_flag = 1;
 		}		
 	}
 
 	if  (event_data->rdp_scan_code == RDP_SCANCODE_CAPSLOCK) {
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			caps_flag = (0 == shift_flag);
+			auditor_ctx->caps_flag = (0 == auditor_ctx->shift_flag);
 		}	
 	}
 
 	if  (event_data->rdp_scan_code == RDP_SCANCODE_NUMLOCK) {
 		if (event_data->flags & KBD_FLAGS_RELEASE) {
-			num_lock = (0 == num_lock);
+			auditor_ctx->num_lock = (0 == auditor_ctx->num_lock);
 		}	
 	}
 
@@ -167,20 +167,20 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 		if(pCodeMap){
 			//printf("input: %04X KBD_FLAGS_RELEASE\n", event_data->rdp_scan_code);
 			if(IS_NUM_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code))) {
-				if(num_lock == 1 || IS_EXT_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code)))
+				if(auditor_ctx->num_lock == 1 || IS_EXT_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code)))
 					extend_code = TRUE;
 			} else if(IS_AZ_CODE(RDP_SCANCODE_CODE(event_data->rdp_scan_code))) {
-				if(caps_flag == 1 || shift_flag == 1)
+				if(auditor_ctx->caps_flag == 1 || auditor_ctx->shift_flag == 1)
 					extend_code = TRUE;
 			} else {
-				if (shift_flag)
+				if (auditor_ctx->shift_flag)
 					extend_code = TRUE;
 			}
 
 			if(extend_code && pCodeMap->ext_key)
-				sprintf(buf,"input: %s%s%s\n", ctrl_flag?"ctrl + ":" ", alt_flag?"alt + ":" ", pCodeMap->ext_key);
+				sprintf(buf,"input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->ext_key);
 			else
-				sprintf(buf,"input: %s%s%s\n", ctrl_flag?"ctrl + ":" ", alt_flag?"alt + ":" ", pCodeMap->key);
+				sprintf(buf,"input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);
 			printf("%s", buf);
 			//tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %04X\n", event_data->rdp_scan_code);			
 		}

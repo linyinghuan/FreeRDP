@@ -195,24 +195,22 @@ error_out:
 	return error;
 }
 
-void auditor_clip_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent)
+void auditor_clip_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
-	auditor_clip_event_handler(AUDITOR_CLIENT, pData, pEvent);
+	auditor_clip_event_handler(AUDITOR_CLIENT, pData, pEvent, AUDITOR_CTX_DATA *auditor_ctx);
 }
 
-void auditor_clip_server_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent)
+void auditor_clip_server_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
-	auditor_clip_event_handler(AUDITOR_SERVER, pData, pEvent);
+	auditor_clip_event_handler(AUDITOR_SERVER, pData, pEvent, AUDITOR_CTX_DATA *auditor_ctx);
 }
 
-void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEventInfo* pEvent)
+void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
 	wStream* s;
 	UINT16 msgType;
 	UINT16 msgFlags;
 	UINT32 dataLen;
-	static UINT32 formatID;
-	static CLIPRDR_FORMAT_LIST formatList;
 	UINT error;
 
 	s = Stream_New(NULL, pEvent->data_len);
@@ -236,33 +234,33 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	if (msgType == CB_FORMAT_LIST) {
 		error = CHANNEL_RC_OK;
 
-		formatList.msgType = CB_FORMAT_LIST;
-		formatList.msgFlags = msgFlags;
-		formatList.dataLen = dataLen;
-		if ((error = cliprdr_read_format_list(s, &formatList, pData->ps->cliprdr->useLongFormatNames/*cliprdr->useLongFormatNames*/)) == CHANNEL_RC_OK) {
+		auditor_ctx->formatList.msgType = CB_FORMAT_LIST;
+		auditor_ctx->formatList.msgFlags = msgFlags;
+		auditor_ctx->formatList.dataLen = dataLen;
+		if ((error = cliprdr_read_format_list(s, &auditor_ctx->formatList, pData->ps->cliprdr->useLongFormatNames/*cliprdr->useLongFormatNames*/)) == CHANNEL_RC_OK) {
 			for (int i = 0; i< formatList.numFormats; i++) {
-				printf("-----format id:%#x\t %s\n", formatList.formats[i].formatId, formatList.formats[i].formatName);
+				printf("-----format id:%#x\t %s\n", auditor_ctx->formatList.formats[i].formatId, auditor_ctx->formatList.formats[i].formatName);
 			}
 
 		}
 	}
 	else if (msgType == CB_FORMAT_DATA_REQUEST) {
 		if (Stream_GetRemainingLength(s) >= 4) {
-			Stream_Read_UINT32(s, formatID);
-			printf("format id:%#x\n", formatID);
+			Stream_Read_UINT32(s, auditor_ctx->formatID);
+			printf("format id:%#x\n", auditor_ctx->formatID);
 		}
 	}
 	else if (msgType == CB_FORMAT_DATA_RESPONSE) {
 		int iFoundIndex = -1;
 
-		for (int i = 0; i< formatList.numFormats; i++) {
-			if (formatID == formatList.formats[i].formatId) {
+		for (int i = 0; i< auditor_ctx->formatList.numFormats; i++) {
+			if (auditor_ctx->formatID == auditor_ctx->formatList.formats[i].formatId) {
 				iFoundIndex = i;
-				printf("-----found format id:%#x\t %s\n", formatList.formats[i].formatId, formatList.formats[i].formatName);
+				printf("-----found format id:%#x\t %s\n", auditor_ctx->formatList.formats[i].formatId, auditor_ctx->formatList.formats[i].formatName);
 				break;
 			}}
 
-		if (formatID == CF_UNICODETEXT ) {
+		if (auditor_ctx->formatID == CF_UNICODETEXT ) {
 			LPSTR lpCopyA;
 			if (ConvertFromUnicode(CP_UTF8, 0, (LPCWSTR)s->pointer, -1, &lpCopyA, 0, NULL, NULL) < 1)
 				return NULL;
@@ -270,8 +268,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy UNICODETEXT: %s\n", lpCopyA);
 
 		}
-		else if (formatID == CB_FORMAT_TEXTURILIST  || 
-			( iFoundIndex != -1 && 0 == strncmp(formatList.formats[iFoundIndex].formatName, "FileGroupDescriptorW", strlen("FileGroupDescriptorW") ))/*clientformatID == 0xc07d*/) {
+		else if (auditor_ctx->formatID == CB_FORMAT_TEXTURILIST  || 
+			( iFoundIndex != -1 && 0 == strncmp(auditor_ctx->formatList.formats[iFoundIndex].formatName, "FileGroupDescriptorW", strlen("FileGroupDescriptorW") ))/*clientformatID == 0xc07d*/) {
 			FILEDESCRIPTORW* file_descriptor_array;
 			UINT32 file_descriptor_count;
 			UINT result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);

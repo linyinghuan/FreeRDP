@@ -61,10 +61,21 @@ BOOL proxy_module_entry_point(proxyPluginsManager* plugins_manager)
 
 	tlog_init("auditor.log", 1024 * 1024, 8, 0, 0);
 
+
 	auditor_plugin.MouseEvent = auditor_mouse_event_handler;
 	auditor_plugin.KeyboardEvent = auditor_keyboard_event_handler;
 	auditor_plugin.ServerChannelsInit = auditor_server_channels_init;
 	auditor_plugin.ClientChannelData = auditor_client_channel_handler;
 	auditor_plugin.ServerChannelData = auditor_server_channel_handler;
 	return plugins_manager->RegisterPlugin(&auditor_plugin);
+}
+
+BOOL auditor_set_plugin_data(proxyData* pData, void* data)
+{
+	return g_plugins_manager->SetPluginData(PLUGIN_NAME, pData, data);
+}
+
+void* auditor_get_plugin_data(proxyData* pData)
+{
+	return g_plugins_manager->GetPluginData(PLUGIN_NAME, pData);
 }

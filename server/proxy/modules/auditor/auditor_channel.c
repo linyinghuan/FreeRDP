@@ -6,17 +6,35 @@ static AUDITOR_EVENT_CB auditor_server_cb_tbl[AUDITOR_EVENT_MAX];
 
 BOOL auditor_server_channels_init(proxyData* pdata)
 {
-	printf(TAG, "auditor plugin called\n");
+	AUDITOR_CTX_DATA *auditor_ctx = NULL;
+
+	printf("session $s server channel init\n", pdata->session_id);
+
+	if(NULL == auditor_get_plugin_data(data)) {
+		auditor_ctx = malloc(size(AUDITOR_CTX_DATA));
+		memset(auditor_ctx, 0, sizeof(AUDITOR_CTX_DATA));
+
+		auditor_set_plugin_data(data, auditor_ctx);
+	}
+
 	return TRUE;
 }
 
 BOOL auditor_client_channel_handler(proxyData* data, void* context)
 {
+	AUDITOR_CTX_DATA *auditor_ctx = NULL;
+
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
+
+	auditor_ctx = auditor_get_plugin_data(data);
+	if(NULL == auditor_ctx) {
+		printf("client channel data without auditor ctx\n");
+		return TRUE;
+	}
 
 	if ( 0 == strncmp(pEvent->channel_name, "cliprdr", strlen("cliprdr") )) {
 		if(auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB])
-			auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent);
+			auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent, auditor_ctx);
 	}
 
 	return TRUE;
@@ -24,11 +42,18 @@ BOOL auditor_client_channel_handler(proxyData* data, void* context)
 
 BOOL auditor_server_channel_handler(proxyData* data, void* context)
 {
+	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
+
+	auditor_ctx = auditor_get_plugin_data(data);
+	if(NULL == auditor_ctx) {
+		printf("server channel data without auditor ctx\n");
+		return TRUE;
+	}
 
 	if ( 0 == strncmp(pEvent->channel_name, "cliprdr", strlen("cliprdr") )) {
 		if(auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB])
-			auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent);
+			auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent, auditor_ctx);
 	}
 
 	return TRUE;
