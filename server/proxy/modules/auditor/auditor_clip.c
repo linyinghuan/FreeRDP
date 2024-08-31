@@ -219,7 +219,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
 		if (auditor_ctx->clip_stream != NULL) {
-			Stream_Free(auditor_ctx->clip_stream);
+			Stream_Free(auditor_ctx->clip_stream, TRUE);
 		}
 		auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
 		Stream_SetPosition(auditor_ctx->clip_stream, 0);

@@ -27,7 +27,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
 		if (auditor_ctx->rdpdr_stream != NULL) {
-			Stream_Free(auditor_ctx->rdpdr_stream);
+			Stream_Free(auditor_ctx->rdpdr_stream, TRUE);
 		}
 		auditor_ctx->rdpdr_stream = Stream_New(NULL, pEvent->data_len);
 		Stream_SetPosition(auditor_ctx->rdpdr_stream, 0);
@@ -218,7 +218,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
 		if (auditor_ctx->rdpdr_stream != NULL) {
-			Stream_Free(auditor_ctx->rdpdr_stream);
+			Stream_Free(auditor_ctx->rdpdr_stream, TRUE);
 		}
 		auditor_ctx->rdpdr_stream = Stream_New(NULL, pEvent->data_len);
 		Stream_SetPosition(auditor_ctx->rdpdr_stream, 0);
