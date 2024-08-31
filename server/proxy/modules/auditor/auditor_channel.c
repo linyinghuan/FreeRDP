@@ -37,6 +37,11 @@ BOOL auditor_client_channel_handler(proxyData* pdata, void* context)
 			auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB](pdata, pEvent, auditor_ctx);
 	}
 
+	if ( 0 == strncmp(pEvent->channel_name, "rdpdr", strlen("rdpdr") )) {
+		if(auditor_client_cb_tbl[AUDITOR_EVENT_RDPDR])
+			auditor_client_cb_tbl[AUDITOR_EVENT_RDPDR](pdata, pEvent, auditor_ctx);
+	}
+
 	return TRUE;
 }
 
@@ -54,6 +59,11 @@ BOOL auditor_server_channel_handler(proxyData* pdata, void* context)
 	if ( 0 == strncmp(pEvent->channel_name, "cliprdr", strlen("cliprdr") )) {
 		if(auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB])
 			auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB](pdata, pEvent, auditor_ctx);
+	}
+
+	if ( 0 == strncmp(pEvent->channel_name, "rdpdr", strlen("rdpdr") )) {
+		if(auditor_server_cb_tbl[AUDITOR_EVENT_RDPDR])
+			auditor_server_cb_tbl[AUDITOR_EVENT_RDPDR](pdata, pEvent, auditor_ctx);
 	}
 
 	return TRUE;

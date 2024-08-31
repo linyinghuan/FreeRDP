@@ -209,14 +209,22 @@ void auditor_clip_server_event_handler(proxyData* pData, proxyChannelDataEventIn
 
 void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
-	wStream* s;
+	wStream* s = NULL;
 	UINT16 msgType;
 	UINT16 msgFlags;
 	UINT32 dataLen;
 	UINT error;
 
-	s = Stream_New(NULL, pEvent->data_len);
-	Stream_SetPosition(s, 0);
+
+	if (pEvent->flags & CHANNEL_FLAG_FIRST)
+	{
+		if (auditor_ctx->clip_stream != NULL) {
+			Stream_Free(auditor_ctx->clip_stream);
+		}
+		auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
+		Stream_SetPosition(auditor_ctx->clip_stream, 0);
+	}
+	s = auditor_ctx->clip_stream;
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
@@ -291,5 +299,5 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	}
 
 finish:
-	Stream_Free(s, TRUE);
+	return;
 }

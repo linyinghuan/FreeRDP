@@ -16,6 +16,10 @@ typedef struct {
 	/* clipboard data */
 	UINT32 formatID;
 	CLIPRDR_FORMAT_LIST formatList;
+	wStream* clip_stream;
+
+	/* rdpdr data */
+	wStream* rdpdr_stream;
 
 } AUDITOR_CTX_DATA;
 
