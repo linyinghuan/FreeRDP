@@ -17,7 +17,7 @@ typedef struct {
 	UINT32 formatID;
 	CLIPRDR_FORMAT_LIST formatList;
 
-} AUDITOR_CTX_DATA
+} AUDITOR_CTX_DATA;
 
 #define TAG MODULE_TAG("auditor")
 
