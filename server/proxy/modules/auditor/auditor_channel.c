@@ -8,25 +8,25 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
-	printf("session $s server channel init\n", pdata->session_id);
+	printf("session %s server channel init\n", pdata->session_id);
 
-	if(NULL == auditor_get_plugin_data(data)) {
-		auditor_ctx = malloc(size(AUDITOR_CTX_DATA));
+	if(NULL == auditor_get_plugin_data(pdata)) {
+		auditor_ctx = malloc(sizeof(AUDITOR_CTX_DATA));
 		memset(auditor_ctx, 0, sizeof(AUDITOR_CTX_DATA));
 
-		auditor_set_plugin_data(data, auditor_ctx);
+		auditor_set_plugin_data(pdata, auditor_ctx);
 	}
 
 	return TRUE;
 }
 
-BOOL auditor_client_channel_handler(proxyData* data, void* context)
+BOOL auditor_client_channel_handler(proxyData* pdata, void* context)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
 
-	auditor_ctx = auditor_get_plugin_data(data);
+	auditor_ctx = auditor_get_plugin_data(pdata);
 	if(NULL == auditor_ctx) {
 		printf("client channel data without auditor ctx\n");
 		return TRUE;
@@ -34,18 +34,18 @@ BOOL auditor_client_channel_handler(proxyData* data, void* context)
 
 	if ( 0 == strncmp(pEvent->channel_name, "cliprdr", strlen("cliprdr") )) {
 		if(auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB])
-			auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent, auditor_ctx);
+			auditor_client_cb_tbl[AUDITOR_EVENT_CLIPB](pdata, pEvent, auditor_ctx);
 	}
 
 	return TRUE;
 }
 
-BOOL auditor_server_channel_handler(proxyData* data, void* context)
+BOOL auditor_server_channel_handler(proxyData* pdata, void* context)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
 
-	auditor_ctx = auditor_get_plugin_data(data);
+	auditor_ctx = auditor_get_plugin_data(pdata);
 	if(NULL == auditor_ctx) {
 		printf("server channel data without auditor ctx\n");
 		return TRUE;
@@ -53,7 +53,7 @@ BOOL auditor_server_channel_handler(proxyData* data, void* context)
 
 	if ( 0 == strncmp(pEvent->channel_name, "cliprdr", strlen("cliprdr") )) {
 		if(auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB])
-			auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB](data, pEvent, auditor_ctx);
+			auditor_server_cb_tbl[AUDITOR_EVENT_CLIPB](pdata, pEvent, auditor_ctx);
 	}
 
 	return TRUE;

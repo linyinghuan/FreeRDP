@@ -19,6 +19,9 @@ typedef struct {
 
 } AUDITOR_CTX_DATA;
 
+BOOL auditor_set_plugin_data(proxyData* pData, void* data);
+void* auditor_get_plugin_data(proxyData* pData);
+
 #define TAG MODULE_TAG("auditor")
 
 #endif
