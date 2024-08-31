@@ -2,9 +2,9 @@
 #include "auditor_channel.h"
 #include "auditor_clip.h"
 
-void auditor_clip_event_handler(UINT mode, proxyData* pdata, proxyChannelDataEventInfo* pEvent);
-void auditor_clip_client_event_handler(proxyData* pdata, proxyChannelDataEventInfo* pEvent);
-void auditor_clip_server_event_handler(proxyData* pdata, proxyChannelDataEventInfo* pEvent);
+void auditor_clip_event_handler(UINT mode, proxyData* pdata, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx);
+void auditor_clip_client_event_handler(proxyData* pdata, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx);
+void auditor_clip_server_event_handler(proxyData* pdata, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx);
 
 __attribute__((constructor)) static int auditor_clip_init()
 {
