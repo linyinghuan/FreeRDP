@@ -220,7 +220,7 @@ static BOOL pf_server_receive_channel_data_hook(freerdp_peer* peer, UINT16 chann
 			ev.total_size = totalSize;
 			ev.valid = true;
 
-			pf_modules_run_filter(FILTER_TYPE_SERVER_AUDITOR_CHANNEL_DATA, pdata, &ev)
+			pf_modules_run_filter(FILTER_TYPE_SERVER_AUDITOR_CHANNEL_DATA, pdata, &ev);
 		}
 	}
 
