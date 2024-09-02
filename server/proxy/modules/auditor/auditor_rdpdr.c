@@ -137,7 +137,7 @@ AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* l
 	return NULL;
 }
 
-void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
 {
 	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
 	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;
@@ -402,7 +402,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		auditor_ctx->g_createNewFileNeed = false;
 		if (IoStatus == 0) {
 			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", auditor_ctx->g_createNewFilePath);
-			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", pNext->path->m_path);
+			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_createNewFilePath);
 		}
 	}
 
@@ -412,7 +412,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	if (IoStatus == STATUS_NO_MORE_FILES) {
 		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
 
-		auditor_rdpdr_update_path_table(&auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node);
+		auditor_rdpdr_update_path_table(pData, &auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node);
 		/*
 		if (g_rdpdrpath.find(g_newPath) != g_rdpdrpath.end()) {
 			printf("---------------------rdpdr_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
