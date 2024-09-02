@@ -182,9 +182,11 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 	s = Stream_New(NULL, pEvent->data_len);
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 
+#if  0
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
 		return;
 	}
+#endif
 	Stream_SetPosition(s, 0);
 	if (Stream_GetRemainingLength(s) < 8)
 		return;
@@ -374,9 +376,12 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 #endif
 	s = Stream_New(NULL, pEvent->data_len);
 	Stream_Write(s, pEvent->data, pEvent->data_len);
+
+#if 0
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
 		return;
 	}
+#endif
 	Stream_SetPosition(s, 0);
 	if (Stream_GetRemainingLength(s) < 8)
 		return;
