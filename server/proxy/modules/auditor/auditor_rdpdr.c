@@ -104,6 +104,7 @@ UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, AUDITOR_R
 	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list->node;
 
 	while(pNext) {
+		pTmp = pNext;
 		if(0 ==strcmp(pNext->path->m_path, path_info->m_path))
 			return 0;
 
