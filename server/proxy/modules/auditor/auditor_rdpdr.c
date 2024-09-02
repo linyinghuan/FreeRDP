@@ -85,7 +85,7 @@ UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char *
 
 AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key)
 {
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table->node;
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
 
 	while(pNext) {
 		if(0 ==strcmp(pNext->path_key, key))
