@@ -148,14 +148,17 @@ void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char*
 
 		while(pNext) {
 			printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
 			pNext = pNext->next;
 		}
 	} else {
 		pNext = list;
 
 		while(pNext) {
-			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path))
+			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
 				printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+				tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
+			}
 			pNext = pNext->next;
 		}
 	}
@@ -399,6 +402,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		auditor_ctx->g_createNewFileNeed = false;
 		if (IoStatus == 0) {
 			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", auditor_ctx->g_createNewFilePath);
+			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", pNext->path->m_path);
 		}
 	}
 
