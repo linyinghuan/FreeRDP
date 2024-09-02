@@ -53,11 +53,11 @@ __attribute__((constructor)) static int auditor_rdpdr_init()
 	return 0;
 }
 
-UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char *key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char *key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
 {
 	AUDITOR_RDPDR_PATH_TABLE_NODE* node = NULL;
 	AUDITOR_RDPDR_PATH_TABLE_NODE* pTmp = NULL;
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table->node;
 
 	while(pNext) {
 		pTmp = pNext;
@@ -78,14 +78,14 @@ UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char *
 	if(pTmp)
 		pTmp->next = node;
 	else
-		table = node;
+		table->node = node;
 
 	return 1;
 }
 
-AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key)
+AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key)
 {
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table->node;
 
 	while(pNext) {
 		if(0 ==strcmp(pNext->path_key, key))
@@ -97,11 +97,11 @@ AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_T
 	return NULL;
 }
 
-UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, AUDITOR_RDPDR_PATH *path_info)
+UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, AUDITOR_RDPDR_PATH *path_info)
 {
 	AUDITOR_RDPDR_PATH_LIST_NODE* node = NULL;
 	AUDITOR_RDPDR_PATH_LIST_NODE* pTmp = NULL;
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list->node;
 
 	while(pNext) {
 		if(0 ==strcmp(pNext->path->m_path, path_info->m_path))
@@ -117,14 +117,14 @@ UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, AUDITOR_R
 	if(pTmp)
 		pTmp->next = node;
 	else
-		list = node;
+		list->node = node;
 
 	return 1;
 }
 
-AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, char *path)
+AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, char *path)
 {
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list->node;
 
 	while(pNext) {
 		if(0 ==strcmp(pNext->path->m_path, path))
@@ -136,7 +136,7 @@ AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* l
 	return NULL;
 }
 
-void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
 {
 	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
 	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;

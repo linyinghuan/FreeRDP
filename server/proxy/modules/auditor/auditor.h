@@ -16,12 +16,20 @@ typedef struct auditor_rdpdr_path_list_node {
 	AUDITOR_RDPDR_PATH *path;
 } AUDITOR_RDPDR_PATH_LIST_NODE;
 
+typedef struct auditor_rdpdr_path_list_node {
+	AUDITOR_RDPDR_PATH_LIST_NODE *node;
+} AUDITOR_RDPDR_PATH_LIST_HEAD;
+
 typedef struct auditor_rdpdr_path_table_node {
 	struct auditor_rdpdr_path_table_node *next;
 
 	char *path_key;
 	AUDITOR_RDPDR_PATH_LIST_NODE *path_list;
 } AUDITOR_RDPDR_PATH_TABLE_NODE;
+
+typedef struct  {
+	AUDITOR_RDPDR_PATH_TABLE_NODE *node;
+} AUDITOR_RDPDR_PATH_TABLE_HEAD;
 
 typedef struct {
 	/* keyboard data */
@@ -45,8 +53,8 @@ typedef struct {
 	char *g_createNewFilePath;
 	UINT32 g_createNewFileAttributes;
 	char *g_newPath;
-	AUDITOR_RDPDR_PATH_TABLE_NODE *g_rdpdrpath;
-	AUDITOR_RDPDR_PATH_LIST_NODE *g_rdpdrpath_list;
+	AUDITOR_RDPDR_PATH_TABLE_HEAD g_rdpdrpath;
+	AUDITOR_RDPDR_PATH_LIST_HEAD  g_rdpdrpath_list;
 
 } AUDITOR_CTX_DATA;
 
