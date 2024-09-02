@@ -118,6 +118,8 @@ UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, AUDITOR_R
 		pTmp->next = node;
 	else
 		list = node;
+
+	return 1;
 }
 
 AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, char *path)
@@ -166,9 +168,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 	wStream* s = NULL;
 	UINT16 component;
 	UINT16 packetId;
-	UINT32 deviceId;
-	UINT32 status;
-	UINT error = ERROR_INVALID_DATA;
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
@@ -358,7 +357,6 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	UINT32 EaSize;
 	UINT8 ShortNameLength;
 	LPSTR lpFileNameA;
-	UINT error;
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
@@ -525,7 +523,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					memset(path_info, 0, sizeof(AUDITOR_RDPDR_PATH));
 					path_info->m_path = lpFileNameA;
 					if (FileAttributes | 0x00000010) {
-						path_info->.m_isDir = 1;
+						path_info->m_isDir = 1;
 					}
 					auditor_rdpdr_add_path_list(auditor_ctx->g_rdpdrpath_list, path_info);
 					//free(lpFileNameA);
