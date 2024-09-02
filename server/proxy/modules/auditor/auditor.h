@@ -16,7 +16,7 @@ typedef struct auditor_rdpdr_path_list_node {
 	AUDITOR_RDPDR_PATH *path;
 } AUDITOR_RDPDR_PATH_LIST_NODE;
 
-typedef struct auditor_rdpdr_path_list_node {
+typedef struct {
 	AUDITOR_RDPDR_PATH_LIST_NODE *node;
 } AUDITOR_RDPDR_PATH_LIST_HEAD;
 
