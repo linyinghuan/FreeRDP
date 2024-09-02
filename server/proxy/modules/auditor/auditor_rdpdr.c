@@ -312,7 +312,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
 										if (strlen(lpFileNameA) > 0) {
 											auditor_ctx->g_newPath = lpFileNameA;
-											auditor_ctx->g_rdpdrpath_list = NULL;
+											auditor_ctx->g_rdpdrpath_list.node = NULL;
 										}
 										//free(lpFileNameA);
 									}
