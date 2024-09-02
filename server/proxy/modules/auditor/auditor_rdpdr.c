@@ -53,7 +53,114 @@ __attribute__((constructor)) static int auditor_rdpdr_init()
 	return 0;
 }
 
+UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char *key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+{
+	AUDITOR_RDPDR_PATH_TABLE_NODE* node = NULL;
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pTmp = NULL;
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
 
+	while(pNext) {
+		pTmp = pNext；
+		if(0 ==strcmp(pNext->path_key, key)) {
+			//free old list
+			pNext->path = list;
+			return 0;
+		}
+
+		pNext = pNext->next;
+	}
+
+	node = malloc(sizeof(AUDITOR_RDPDR_PATH_TABLE_NODE));
+	memset(node, 0, sizeof(AUDITOR_RDPDR_PATH_TABLE_NODE));
+	node->path_key = key;
+	node->path_list = list;
+
+	if(pTmp)
+		pTmp->next = node;
+	else
+		table = node;
+
+	return 1;
+}
+
+AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key)
+{
+	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
+
+	while(pNext) {
+		pTmp = pNext；
+		if(0 ==strcmp(pNext->path_key, key))
+			return pNext->path_list;
+
+		pNext = pNext->next;
+	}
+
+	return NULL;
+}
+
+UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, AUDITOR_RDPDR_PATH *path_info)
+{
+	AUDITOR_RDPDR_PATH_LIST_NODE* node = NULL;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pTmp = NULL;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
+
+	while(pNext) {
+		if(0 ==strcmp(pNext->path->m_path, path_info->m_path))
+			return 0;
+
+		pNext = pNext->next;
+	}
+
+	node = malloc(sizeof(AUDITOR_RDPDR_PATH_LIST_NODE));
+	memset(node, 0, sizeof(AUDITOR_RDPDR_PATH_LIST_NODE));
+	node->path = path_info;
+
+	if(pTmp)
+		pTmp->next = node;
+	else
+		list = node;
+}
+
+UINT32 auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, char *path)
+{
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
+
+	while(pNext) {
+		if(0 ==strcmp(pNext->path->m_path, path))
+			return pNext->path_list;
+
+		pNext = pNext->next;
+	}
+
+	return NULL;
+}
+
+void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+{
+	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;
+
+	pOldList =  auditor_rdpdr_find_path_table(table, key);
+	if(NULL == pOldList) {
+		pNext = list;
+
+		while(pNext) {
+			printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+			pNext = pNext->next;
+		}
+	} else {
+		pNext = list;
+
+		while(pNext) {
+			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path))
+				printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+			pNext = pNext->next;
+		}
+	}
+
+	auditor_rdpdr_add_path_table(tabel, key, list);
+
+}
 
 void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
@@ -110,7 +217,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 					printf("cliboard_filter_client_Event  PAKID_CORE_DEVICE_IOREQUEST\n" );
 
 					if (Stream_GetRemainingLength(s) < 20)
-						return true;
+						return;
 
 					Stream_Read_UINT32(s, DeviceId); /* DeviceId (4 bytes) */
 					Stream_Read_UINT32(s, FileId);        /* FileId (4 bytes) */
@@ -144,7 +251,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						Stream_Read_UINT32(s, PathLength);
 
 						if (Stream_GetRemainingLength(s) < PathLength)
-							return ERROR_INVALID_DATA;
+							return;
 
 						path = (const WCHAR*)Stream_Pointer(s);
 						{
@@ -160,11 +267,11 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 								if ((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002) ) ) {
-									g_createNewFilePath = lpFileNameA;
-									g_createNewFileNeed = true;
-									g_createNewFileAttributes = FileAttributes;
+									auditor_ctx->g_createNewFilePath = lpFileNameA;
+									auditor_ctx->g_createNewFileNeed = true;
+									auditor_ctx->g_createNewFileAttributes = FileAttributes;
 								}
-								free(lpFileNameA);
+								//free(lpFileNameA);
 							}
 						}
 					}
@@ -174,7 +281,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						{
 							case IRP_MN_QUERY_DIRECTORY:
 							{
-								g_need = true;
+								auditor_ctx->g_need = true;
 								const WCHAR* path;
 								//DRIVE_FILE* file;
 								BYTE InitialQuery;
@@ -189,7 +296,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								Stream_Read_UINT32(s, PathLength);
 								Stream_Seek(s, 23); /* Padding */
 								path = (WCHAR*)Stream_Pointer(s);
-								g_FsInformationClass = FsInformationClass;
+								auditor_ctx->g_FsInformationClass = FsInformationClass;
 								{
 									if (PathLength < s->length) {
 										WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
@@ -200,17 +307,16 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(path2);
 										printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
 										if (strlen(lpFileNameA) > 0) {
-											g_newPath = lpFileNameA;
-											g_rdpdrpathnew.clear();
+											auditor_ctx->g_newPath = lpFileNameA;
+											auditor_ctx->g_rdpdrpath_list = NULL;
 										}
-										free(lpFileNameA);
+										//free(lpFileNameA);
 									}
 								}
 							}
 							break;
 
 						case IRP_MN_NOTIFY_CHANGE_DIRECTORY: /* TODO */
-							//return irp->Discard(irp);
 							break;
 						default:
 							break;
@@ -271,7 +377,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	}
 
 	if (Stream_GetRemainingLength(s) < 8)
-		return true;
+		return;
 
 	Stream_Read_UINT16(s, msgRDPDRCTYP); // Component (2 bytes)
 	Stream_Read_UINT16(s, msgRDPDRPAKID); // PacketId (2 bytes)
@@ -281,19 +387,21 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
 
 
-	if (g_createNewFileNeed) {
-		g_createNewFileNeed = false;
+	if (auditor_ctx->g_createNewFileNeed) {
+		auditor_ctx->g_createNewFileNeed = false;
 		if (IoStatus == 0) {
-			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
+			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", auditor_ctx->g_createNewFilePath);
 		}
 	}
 
-	if (!g_need)
+	if (!auditor_ctx->g_need)
 		return true;
 
-	if (IoStatus == STATUS_NO_MORE_FILES ) {
+	if (IoStatus == STATUS_NO_MORE_FILES) {
 		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
 
+		auditor_rdpdr_update_path_table(auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list);
+		/*
 		if (g_rdpdrpath.find(g_newPath) != g_rdpdrpath.end()) {
 			printf("---------------------rdpdr_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
 			for(list<FileBriefInfo>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
@@ -316,11 +424,12 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			}
 		}
 		g_rdpdrpath[g_newPath] = g_rdpdrpathnew;
-		return true;
+		*/
+		return;
 	}
 
 
-	g_need = false;
+	auditor_ctx->g_need = false;
 	switch (g_FsInformationClass)
 	{
 		case FileDirectoryInformation:
@@ -343,7 +452,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
 			path = (WCHAR*)Stream_Pointer(s);
 			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return NULL;
+				return;
 
 			printf("=========path:[%s]\n", lpFileNameA);
 			break;
@@ -370,8 +479,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 			path = (WCHAR*)Stream_Pointer(s);
 			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return NULL;
-
+				return;
 			printf("=========path:[%s]\n", lpFileNameA);
 			break;
 
@@ -379,7 +487,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			Stream_Read_UINT32(s, totalLength); /* Length */
 			if (totalLength == 0) {
 				printf("=========total length is 0, maybe MJ_Close\n");
-				return true;
+				return;
 			}
 			Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
 			Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
@@ -400,9 +508,10 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			Stream_Read_UINT32(s, EaSize);                                /* EaSize */
 			Stream_Read_UINT8(s, ShortNameLength);
 			Stream_Seek(s, 24);
-			//Stream_Zero(output, 24); /* ShortName */
 			path = (WCHAR*)Stream_Pointer(s);
 			{
+				AUDITOR_RDPDR_PATH *path_info = NULL;
+
 				if (Length < s->length) {
 					WCHAR* path2 = (WCHAR*)calloc(Length + 1, sizeof(WCHAR));
 					memcpy(path2, path, Length);
@@ -412,18 +521,15 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					free(path2);
 					printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
 					printf("=========FileBothDirectoryInformation FileAttributes:[0x%x]\n", FileAttributes);
+
+					path_info = malloc(sizeof(AUDITOR_RDPDR_PATH));
+					memset(path_info, 0, sizeof(AUDITOR_RDPDR_PATH));
+					path_info->m_path = lpFileNameA;
 					if (FileAttributes | 0x00000010) {
-						FileBriefInfo fileBriefInfo;
-						fileBriefInfo.m_path = lpFileNameA;
-						fileBriefInfo.m_isDir = 1;
-						g_rdpdrpathnew.push_back(fileBriefInfo);;
-					}else {
-						FileBriefInfo fileBriefInfo;
-						fileBriefInfo.m_path = lpFileNameA;
-						fileBriefInfo.m_isDir = 0;
-						g_rdpdrpathnew.push_back(fileBriefInfo);
+						path_info->.m_isDir = 1;
 					}
-					free(lpFileNameA);
+					auditor_rdpdr_add_path_list(auditor_ctx->g_rdpdrpath_list, path_info);
+					//free(lpFileNameA);
 				}
 			}
 			break;
@@ -435,7 +541,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
 			path = (WCHAR*)Stream_Pointer(s);
 			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return NULL;
+				return;
 			printf("=========filename:[%s]\n", lpFileNameA);
 			break;
 

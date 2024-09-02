@@ -6,6 +6,24 @@
 #include "tlog.h"
 
 typedef struct {
+	char *m_path;
+	int m_isDir;
+} AUDITOR_RDPDR_PATH;
+
+typedef struct {
+	AUDITOR_RDPDR_PATH_LIST_NODE *next;
+
+	AUDITOR_RDPDR_PATH *path;
+} AUDITOR_RDPDR_PATH_LIST_NODE;
+
+typedef struct {
+	AUDITOR_RDPDR_PATH_TABLE_NODE *next;
+
+	char *path_key;
+	AUDITOR_RDPDR_PATH_LIST_NODE *path_list;
+} AUDITOR_RDPDR_PATH_TABLE_NODE;
+
+typedef struct {
 	/* keyboard data */
 	int ctrl_flag;
 	int shift_flag;
@@ -20,6 +38,13 @@ typedef struct {
 
 	/* rdpdr data */
 	wStream* rdpdr_stream;
+	bool g_need;
+	bool g_createNewFileNeed;
+	char *g_createNewFilePath;
+	UINT32 g_createNewFileAttributes;
+	char *g_newPath;
+	AUDITOR_RDPDR_PATH_TABLE_NODE *g_rdpdrpath;
+	AUDITOR_RDPDR_PATH_LIST_NODE *g_rdpdrpath_list;
 
 } AUDITOR_CTX_DATA;
 
