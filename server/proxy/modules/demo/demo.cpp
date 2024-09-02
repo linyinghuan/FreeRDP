@@ -401,7 +401,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 		printf("---------------------cliboard_filter_server_Event Type: %s -----------------\n", pev->channel_name);
 
 
-		if (pev->flags & CHANNEL_FLAG_FIRST)
+		if (1)
 		{
 			if (server_data_in == NULL) {
 				server_data_in = Stream_New(NULL, pev->data_len);
@@ -448,59 +448,7 @@ static BOOL cliboard_filter_server_Event(proxyData* data, void* context) {
 
 				printf("---------------------cliboard_filter_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
 
-				/*
-				if (g_createNewFilePath == "" || g_createNewFilePath == "\\") {
 
-					printf("---------------------cliboard_filter_server_Event  file [%s]-----------------\n", g_createNewFilePath.c_str());
-					return true;
-				}
-
-
-				// Function to find the last
-				// character ch in str
-				size_t found = g_createNewFilePath.find_last_of('\\');
-				if (found != string::npos) {
-
-					string filePath = g_createNewFilePath.substr(found + 1);
-					string rootPath;
-					if (found > 0)
-						rootPath = g_createNewFilePath.substr(0, found - 1);
-					else
-						rootPath = "\\";
-
-					rootPath = rootPath + "*";
-					if(g_rdpdrpath.find(rootPath + "") != g_rdpdrpath.end()) {
-
-						for(list<FileBriefInfo>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
-							if (ita->m_path == filePath) {
-								if (ita->m_isDir) {
-
-									printf("--2-------------------cliboard_filter_server_Event  file [%s]-----------------\n", g_createNewFilePath.c_str());
-									return true;
-								}
-							}
-						}
-					}
-
-
-
-					if (g_createNewFileAttributes & 0x00000010) {
-						FileBriefInfo fileBriefInfo;
-						fileBriefInfo.m_path = filePath;
-						fileBriefInfo.m_isDir = 1;
-						g_rdpdrpath[rootPath].push_back(fileBriefInfo);
-					}
-					else {
-						FileBriefInfo fileBriefInfo;
-						fileBriefInfo.m_path = filePath;
-						fileBriefInfo.m_isDir = 0;
-						g_rdpdrpath[rootPath].push_back(fileBriefInfo);
-					}
-
-
-					printf("---------------------cliboard_filter_server_Event  file [%s] is created-----------------\n", g_createNewFilePath.c_str());
-
-				}*/
 			}
 		}
 
@@ -854,7 +802,7 @@ static BOOL cliboard_filter_client_Event(proxyData* data, void* context) {
 		printf("cliboard_filter_client_Event Type: %s -----------------\n", pev->channel_name);
 
 
-		if (pev->flags & CHANNEL_FLAG_FIRST)
+		if (1)
 		{
 			if (server_data_in == NULL) {
 				server_data_in = Stream_New(NULL, pev->data_len);
