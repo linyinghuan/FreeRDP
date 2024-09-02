@@ -10,14 +10,14 @@ typedef struct {
 	int m_isDir;
 } AUDITOR_RDPDR_PATH;
 
-typedef struct {
-	AUDITOR_RDPDR_PATH_LIST_NODE *next;
+typedef struct auditor_rdpdr_path_list_node {
+	struct auditor_rdpdr_path_list_node *next;
 
 	AUDITOR_RDPDR_PATH *path;
 } AUDITOR_RDPDR_PATH_LIST_NODE;
 
-typedef struct {
-	AUDITOR_RDPDR_PATH_TABLE_NODE *next;
+typedef struct auditor_rdpdr_path_table_node {
+	struct auditor_rdpdr_path_table_node *next;
 
 	char *path_key;
 	AUDITOR_RDPDR_PATH_LIST_NODE *path_list;
