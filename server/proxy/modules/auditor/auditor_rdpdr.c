@@ -63,7 +63,7 @@ UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char *
 		pTmp = pNext;
 		if(0 ==strcmp(pNext->path_key, key)) {
 			//free old list
-			pNext->path = list;
+			pNext->path_list = list;
 			return 0;
 		}
 
@@ -226,9 +226,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 					printf("cliboard_filter_client_Event MajorFunction: 0x%x -----------------\n", MajorFunction);
 
 					if (MajorFunction == IRP_MJ_CREATE) {
-						UINT32 FileId;
+						//UINT32 FileId;
 						//DRIVE_FILE* file;
-						BYTE Information;
+						//BYTE Information;
 						UINT32 FileAttributes;
 						UINT32 SharedAccess;
 						UINT32 DesiredAccess;
@@ -288,7 +288,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								UINT32 FsInformationClass;
 
 								if (Stream_GetRemainingLength(s) < 32)
-									return ERROR_INVALID_DATA;
+									return;
 
 								Stream_Read_UINT32(s, FsInformationClass);
 								Stream_Read_UINT8(s, InitialQuery);
@@ -302,7 +302,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										memcpy(path2, path, PathLength);
 										LPSTR lpFileNameA;
 										if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-											return true;
+											return;
 										free(path2);
 										printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
 										if (strlen(lpFileNameA) > 0) {
@@ -394,7 +394,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	}
 
 	if (!auditor_ctx->g_need)
-		return true;
+		return;
 
 	if (IoStatus == STATUS_NO_MORE_FILES) {
 		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
@@ -429,7 +429,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 
 	auditor_ctx->g_need = false;
-	switch (g_FsInformationClass)
+	switch (auditor_ctx->g_FsInformationClass)
 	{
 		case FileDirectoryInformation:
 			Stream_Read_UINT32(s, totalLength); /* Length */
@@ -516,7 +516,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					memcpy(path2, path, Length);
 
 					if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-						return true;
+						return;
 					free(path2);
 					printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
 					printf("=========FileBothDirectoryInformation FileAttributes:[0x%x]\n", FileAttributes);
