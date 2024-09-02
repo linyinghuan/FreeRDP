@@ -273,7 +273,7 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 			ev.total_size = totalSize;
 			ev.valid = true;
 
-			pf_modules_run_filter(FILTER_TYPE_CLIENT_AUDITOR_CHANNEL_DATA, pdata, &ev)
+			pf_modules_run_filter(FILTER_TYPE_CLIENT_AUDITOR_CHANNEL_DATA, pdata, &ev);
 		}
 	}	
 
