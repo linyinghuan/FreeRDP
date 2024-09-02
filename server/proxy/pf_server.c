@@ -206,6 +206,24 @@ static BOOL pf_server_receive_channel_data_hook(freerdp_peer* peer, UINT16 chann
 	size_t i;
 	const char* channel_name = WTSChannelGetName(peer, channelId);
 
+	for (i = 0; i < config->AuditorCount; i++)
+	{
+		if (strncmp(channel_name, config->Auditor[i], CHANNEL_NAME_LEN) == 0)
+		{
+			proxyChannelDataEventInfo ev;
+
+			ev.channel_id = channelId;
+			ev.channel_name = channel_name;
+			ev.data = data;
+			ev.data_len = size;
+			ev.flags = flags;
+			ev.total_size = totalSize;
+			ev.valid = true;
+
+			pf_modules_run_filter(FILTER_TYPE_SERVER_AUDITOR_CHANNEL_DATA, pdata, &ev)
+		}
+	}
+
 	for (i = 0; i < config->PassthroughCount; i++)
 	{
 		if (strncmp(channel_name, config->Passthrough[i], CHANNEL_NAME_LEN) == 0)
@@ -230,26 +248,6 @@ static BOOL pf_server_receive_channel_data_hook(freerdp_peer* peer, UINT16 chann
 
 			return pc->context.instance->SendChannelData(pc->context.instance,
 			                                             (UINT16)client_channel_id, data, size);
-		}
-	}
-
-
-	for (i = 0; i < config->AuditorCount; i++)
-	{
-		if (strncmp(channel_name, config->Auditor[i], CHANNEL_NAME_LEN) == 0)
-		{
-			proxyChannelDataEventInfo ev;
-
-			ev.channel_id = channelId;
-			ev.channel_name = channel_name;
-			ev.data = data;
-			ev.data_len = size;
-			ev.flags = flags;
-			ev.total_size = totalSize;
-			ev.valid = true;
-
-			if (!pf_modules_run_filter(FILTER_TYPE_SERVER_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
-				return FALSE;
 		}
 	}
 

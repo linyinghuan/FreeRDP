@@ -258,6 +258,25 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 
 	const char* channel_name = freerdp_channels_get_name_by_id(instance, channelId);
 
+	for (i = 0; i < config->AuditorCount; i++)
+	{
+		if (strncmp(channel_name, config->Auditor[i], CHANNEL_NAME_LEN) == 0)
+		{
+			proxyChannelDataEventInfo ev;
+			UINT64 server_channel_id;
+
+			ev.channel_id = channelId;
+			ev.channel_name = channel_name;
+			ev.data = data;
+			ev.data_len = size;
+			ev.flags = flags;
+			ev.total_size = totalSize;
+			ev.valid = true;
+
+			pf_modules_run_filter(FILTER_TYPE_CLIENT_AUDITOR_CHANNEL_DATA, pdata, &ev)
+		}
+	}	
+
 	for (i = 0; i < config->PassthroughCount; i++)
 	{
 		if (strncmp(channel_name, config->Passthrough[i], CHANNEL_NAME_LEN) == 0)
@@ -280,26 +299,6 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 			server_channel_id = (UINT64)HashTable_GetItemValue(ps->vc_ids, (void*)channel_name);
 			return ps->context.peer->SendChannelData(ps->context.peer, (UINT16)server_channel_id,
 			                                         data, size);
-		}
-	}
-
-	for (i = 0; i < config->AuditorCount; i++)
-	{
-		if (strncmp(channel_name, config->Auditor[i], CHANNEL_NAME_LEN) == 0)
-		{
-			proxyChannelDataEventInfo ev;
-			UINT64 server_channel_id;
-
-			ev.channel_id = channelId;
-			ev.channel_name = channel_name;
-			ev.data = data;
-			ev.data_len = size;
-			ev.flags = flags;
-			ev.total_size = totalSize;
-			ev.valid = true;
-
-			if (!pf_modules_run_filter(FILTER_TYPE_CLIENT_PASSTHROUGH_CHANNEL_DATA, pdata, &ev))
-				return FALSE;
 		}
 	}
 
