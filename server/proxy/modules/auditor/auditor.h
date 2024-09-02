@@ -37,7 +37,8 @@ typedef struct {
 	wStream* clip_stream;
 
 	/* rdpdr data */
-	wStream* rdpdr_stream;
+	wStream* rdpdr_client_stream;
+	wStream* rdpdr_server_stream;
 	UINT32 g_FsInformationClass;
 	bool g_need;
 	bool g_createNewFileNeed;

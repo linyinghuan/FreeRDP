@@ -171,15 +171,16 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
-		if (auditor_ctx->rdpdr_stream != NULL) {
-			Stream_Free(auditor_ctx->rdpdr_stream, TRUE);
+		if (auditor_ctx->rdpdr_client_stream != NULL) {
+			Stream_Free(auditor_ctx->rdpdr_client_stream, TRUE);
 		}
-		auditor_ctx->rdpdr_stream = Stream_New(NULL, pEvent->data_len);
-		Stream_SetPosition(auditor_ctx->rdpdr_stream, 0);
+		auditor_ctx->rdpdr_client_stream = Stream_New(NULL, pEvent->data_len);
+		Stream_SetPosition(auditor_ctx->rdpdr_client_stream, 0);
 	}
-	s = auditor_ctx->rdpdr_stream;
+	s = auditor_ctx->rdpdr_client_stream;
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
+	
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
 		return;
 	}
@@ -360,13 +361,13 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
 	{
-		if (auditor_ctx->rdpdr_stream != NULL) {
-			Stream_Free(auditor_ctx->rdpdr_stream, TRUE);
+		if (auditor_ctx->rdpdr_server_stream != NULL) {
+			Stream_Free(auditor_ctx->rdpdr_server_stream, TRUE);
 		}
-		auditor_ctx->rdpdr_stream = Stream_New(NULL, pEvent->data_len);
-		Stream_SetPosition(auditor_ctx->rdpdr_stream, 0);
+		auditor_ctx->rdpdr_server_stream = Stream_New(NULL, pEvent->data_len);
+		Stream_SetPosition(auditor_ctx->rdpdr_server_stream, 0);
 	}
-	s = auditor_ctx->rdpdr_stream;
+	s = auditor_ctx->rdpdr_server_stream;
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
