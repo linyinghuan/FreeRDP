@@ -169,7 +169,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 	UINT16 component;
 	UINT16 packetId;
 
-	if (pEvent->flags & CHANNEL_FLAG_FIRST)
+	if (pEvent->flags & CHANNEL_FLAG_FIRST || !auditor_ctx->rdpdr_client_stream)
 	{
 		if (auditor_ctx->rdpdr_client_stream != NULL) {
 			Stream_Free(auditor_ctx->rdpdr_client_stream, TRUE);
@@ -180,7 +180,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 	s = auditor_ctx->rdpdr_client_stream;
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
-	
+
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
 		return;
 	}
@@ -359,7 +359,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	UINT8 ShortNameLength;
 	LPSTR lpFileNameA;
 
-	if (pEvent->flags & CHANNEL_FLAG_FIRST)
+	if (pEvent->flags & CHANNEL_FLAG_FIRST || !auditor_ctx->rdpdr_server_stream)
 	{
 		if (auditor_ctx->rdpdr_server_stream != NULL) {
 			Stream_Free(auditor_ctx->rdpdr_server_stream, TRUE);
