@@ -83,7 +83,7 @@ UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char *
 	return 1;
 }
 
-AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key)
+AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key)
 {
 	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table->node;
 
@@ -122,9 +122,9 @@ UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, AUDITOR_R
 	return 1;
 }
 
-AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, char *path)
+AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, char *path)
 {
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list->node;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
 
 	while(pNext) {
 		if(0 ==strcmp(pNext->path->m_path, path))
@@ -141,7 +141,7 @@ void auditor_rdpdr_update_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char*
 	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
 	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;
 
-	pOldList =  auditor_rdpdr_find_path_table(table, key);
+	pOldList =  auditor_rdpdr_find_path_table(table->node, key);
 	if(NULL == pOldList) {
 		pNext = list;
 
@@ -407,7 +407,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	if (IoStatus == STATUS_NO_MORE_FILES) {
 		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
 
-		auditor_rdpdr_update_path_table(auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list);
+		auditor_rdpdr_update_path_table(&auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node);
 		/*
 		if (g_rdpdrpath.find(g_newPath) != g_rdpdrpath.end()) {
 			printf("---------------------rdpdr_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
@@ -535,7 +535,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					if (FileAttributes | 0x00000010) {
 						path_info->m_isDir = 1;
 					}
-					auditor_rdpdr_add_path_list(auditor_ctx->g_rdpdrpath_list, path_info);
+					auditor_rdpdr_add_path_list(&auditor_ctx->g_rdpdrpath_list, path_info);
 					//free(lpFileNameA);
 				}
 			}
