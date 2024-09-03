@@ -34,6 +34,26 @@ static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 	}
 }
 
+#define CLIPRDR_FILEDESCRIPTOR_SIZE (4 + 32 + 4 + 16 + 8 + 8 + 520)
+#define CLIPRDR_MAX_FILE_SIZE (2U * 1024 * 1024 * 1024)
+
+static UINT64 filetime_to_uint64(FILETIME value)
+{
+	UINT64 converted = 0;
+	converted |= (UINT32)value.dwHighDateTime;
+	converted <<= 32;
+	converted |= (UINT32)value.dwLowDateTime;
+	return converted;
+}
+
+static FILETIME uint64_to_filetime(UINT64 value)
+{
+	FILETIME converted;
+	converted.dwLowDateTime = (UINT32)(value >> 0);
+	converted.dwHighDateTime = (UINT32)(value >> 32);
+	return converted;
+}
+
 static UINT auditor_parse_file_list(const BYTE* format_data, UINT32 format_data_length,
                              FILEDESCRIPTORW** file_descriptor_array, UINT32* file_descriptor_count)
 {
