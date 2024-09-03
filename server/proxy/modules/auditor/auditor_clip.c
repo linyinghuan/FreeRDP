@@ -34,6 +34,7 @@ static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 	}
 }
 
+
 #define CLIPRDR_FILEDESCRIPTOR_SIZE (4 + 32 + 4 + 16 + 8 + 8 + 520)
 #define CLIPRDR_MAX_FILE_SIZE (2U * 1024 * 1024 * 1024)
 
