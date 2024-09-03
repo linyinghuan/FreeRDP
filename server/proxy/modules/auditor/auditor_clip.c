@@ -34,6 +34,80 @@ static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 	}
 }
 
+static UINT cliprdr_parse_file_list(const BYTE* format_data, UINT32 format_data_length,
+                             FILEDESCRIPTORW** file_descriptor_array, UINT32* file_descriptor_count)
+{
+	UINT result = NO_ERROR;
+	UINT32 i;
+	UINT32 count = 0;
+	wStream sbuffer;
+	wStream* s = &sbuffer;
+
+	if (!format_data || !file_descriptor_array || !file_descriptor_count)
+		return ERROR_BAD_ARGUMENTS;
+
+	Stream_StaticInit(&sbuffer, format_data, format_data_length);
+	if (!s)
+		return ERROR_NOT_ENOUGH_MEMORY;
+
+	if (Stream_GetRemainingLength(s) < 4)
+	{
+		WLog_ERR(TAG, "invalid packed file list");
+
+		result = ERROR_INCORRECT_SIZE;
+		goto out;
+	}
+
+	Stream_Read_UINT32(s, count); /* cItems (4 bytes) */
+
+	if (Stream_GetRemainingLength(s) / CLIPRDR_FILEDESCRIPTOR_SIZE < count)
+	{
+		WLog_ERR(TAG, "packed file list is too short: expected %" PRIuz ", have %" PRIuz,
+		         ((size_t)count) * CLIPRDR_FILEDESCRIPTOR_SIZE, Stream_GetRemainingLength(s));
+
+		result = ERROR_INCORRECT_SIZE;
+		goto out;
+	}
+
+	*file_descriptor_count = count;
+	*file_descriptor_array = calloc(count, sizeof(FILEDESCRIPTORW));
+	if (!*file_descriptor_array)
+	{
+		result = ERROR_NOT_ENOUGH_MEMORY;
+		goto out;
+	}
+
+	for (i = 0; i < count; i++)
+	{
+		UINT64 tmp;
+		FILEDESCRIPTORW* file = &((*file_descriptor_array)[i]);
+
+		Stream_Read_UINT32(s, file->dwFlags);          /* flags (4 bytes) */
+		Stream_Read_UINT32(s, file->clsid.Data1);
+		Stream_Read_UINT16(s, file->clsid.Data2);
+		Stream_Read_UINT16(s, file->clsid.Data3);
+		Stream_Read(s, &file->clsid.Data4, sizeof(file->clsid.Data4));
+		Stream_Read_INT32(s, file->sizel.cx);
+		Stream_Read_INT32(s, file->sizel.cy);
+		Stream_Read_INT32(s, file->pointl.x);
+		Stream_Read_INT32(s, file->pointl.y);
+		Stream_Read_UINT32(s, file->dwFileAttributes); /* fileAttributes (4 bytes) */
+		Stream_Read_UINT64(s, tmp);                    /* ftCreationTime (8 bytes) */
+		file->ftCreationTime = uint64_to_filetime(tmp);
+		Stream_Read_UINT64(s, tmp); /* ftLastAccessTime (8 bytes) */
+		file->ftLastAccessTime = uint64_to_filetime(tmp);
+		Stream_Read_UINT64(s, tmp); /* lastWriteTime (8 bytes) */
+		file->ftLastWriteTime = uint64_to_filetime(tmp);
+		Stream_Read_UINT32(s, file->nFileSizeHigh); /* fileSizeHigh (4 bytes) */
+		Stream_Read_UINT32(s, file->nFileSizeLow);  /* fileSizeLow (4 bytes) */
+		Stream_Read_UTF16_String(s, file->cFileName,
+		                         ARRAYSIZE(file->cFileName)); /* cFileName (520 bytes) */
+	}
+
+out:
+
+	return result;
+}
 
 static UINT cliprdr_read_format_list(wStream* s, CLIPRDR_FORMAT_LIST* formatList, BOOL useLongFormatNames)
 {

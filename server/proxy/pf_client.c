@@ -288,8 +288,6 @@ static BOOL pf_client_receive_channel_data_hook(freerdp* instance, UINT16 channe
 			ev.channel_name = channel_name;
 			ev.data = data;
 			ev.data_len = size;
-
-
 			ev.flags = flags;
 			ev.total_size = totalSize;
 

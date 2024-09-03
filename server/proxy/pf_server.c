@@ -235,9 +235,6 @@ static BOOL pf_server_receive_channel_data_hook(freerdp_peer* peer, UINT16 chann
 			ev.channel_name = channel_name;
 			ev.data = data;
 			ev.data_len = size;
-
-
-
 			ev.flags = flags;
 			ev.total_size = totalSize;
 

@@ -189,7 +189,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 			else
 				sprintf(buf,"input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);
 			printf("%s", buf);
-			//tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %04X\n", event_data->rdp_scan_code);			
+			tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);			
 		}
 	}
 
