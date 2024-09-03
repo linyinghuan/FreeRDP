@@ -34,7 +34,7 @@ static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 	}
 }
 
-static UINT cliprdr_parse_file_list(const BYTE* format_data, UINT32 format_data_length,
+static UINT auditor_parse_file_list(const BYTE* format_data, UINT32 format_data_length,
                              FILEDESCRIPTORW** file_descriptor_array, UINT32* file_descriptor_count)
 {
 	UINT result = NO_ERROR;
@@ -356,7 +356,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			( iFoundIndex != -1 && 0 == strncmp(auditor_ctx->formatList.formats[iFoundIndex].formatName, "FileGroupDescriptorW", strlen("FileGroupDescriptorW") ))/*clientformatID == 0xc07d*/) {
 			FILEDESCRIPTORW* file_descriptor_array;
 			UINT32 file_descriptor_count;
-			UINT result = cliprdr_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
+			UINT result = auditor_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
 			if (result == 0 && file_descriptor_count > 0) {
 				LPSTR lpFileNameA;
