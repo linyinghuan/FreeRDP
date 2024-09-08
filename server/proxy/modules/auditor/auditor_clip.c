@@ -303,28 +303,31 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	static CLIPRDR_FILE_CONTENTS_REQUEST request = {0};
 	static CLIPRDR_FILE_CONTENTS_RESPONSE response = {0};
 
-	if(mode == AUDITOR_SERVER) {
-		if (pEvent->flags & CHANNEL_FLAG_FIRST)
-		{
+	
+	if (pEvent->flags & CHANNEL_FLAG_FIRST)
+	{	
+		if(mode == AUDITOR_SERVER) {
 			if (auditor_ctx->clip_stream != NULL) {
 				Stream_Free(auditor_ctx->clip_stream, TRUE);
 			}
 			auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
 			Stream_SetPosition(auditor_ctx->clip_stream, 0);
+			s = auditor_ctx->clip_stream;
 		}
-		s = auditor_ctx->clip_stream;
-	} else if (mode == AUDITOR_CLIENT) {
-		if (pEvent->flags & CHANNEL_FLAG_FIRST)
-		{
-			if (auditor_ctx->clip_client_stream != NULL) {
-				Stream_Free(auditor_ctx->clip_client_stream, TRUE);
-			}
-			auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
-			Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
+	}
+	else if (mode == AUDITOR_CLIENT) {
+		if (auditor_ctx->clip_client_stream != NULL) {
+			Stream_Free(auditor_ctx->clip_client_stream, TRUE);
 		}
+		auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
+		Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
 		s = auditor_ctx->clip_client_stream;
 	}
 
+	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
+	{
+		return true;
+	}
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
