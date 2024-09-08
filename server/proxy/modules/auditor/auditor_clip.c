@@ -312,7 +312,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			}
 			auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
 			Stream_SetPosition(auditor_ctx->clip_stream, 0);
-			s = auditor_ctx->clip_stream;
 		}
 		else if (mode == AUDITOR_CLIENT) {
 			if (auditor_ctx->clip_client_stream != NULL) {
@@ -320,16 +319,22 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			}
 			auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
 			Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
-			s = auditor_ctx->clip_client_stream;
 		}
+	}
+
+	if(mode == AUDITOR_SERVER) {
+		s = auditor_ctx->clip_stream;
+	}
+	else if (mode == AUDITOR_CLIENT) {
+		s = auditor_ctx->clip_client_stream;
 	}
 
 	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
 	{
 		return;
 	}
-
 	Stream_Write(s, pEvent->data, pEvent->data_len);
+
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
 		goto finish;
 	}
