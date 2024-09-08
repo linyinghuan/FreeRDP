@@ -326,7 +326,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 
 	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
 	{
-		return true;
+		return;
 	}
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
