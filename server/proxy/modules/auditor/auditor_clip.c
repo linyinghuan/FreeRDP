@@ -404,7 +404,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			goto finish;
 		}
 
-		request->haveClipDataId = FALSE;
+		request.haveClipDataId = FALSE;
 		Stream_Read_UINT32(s, request.streamId);      /* streamId (4 bytes) */
 		Stream_Read_UINT32(s, request.listIndex);     /* listIndex (4 bytes) */
 		Stream_Read_UINT32(s, request.dwFlags);       /* dwFlags (4 bytes) */
