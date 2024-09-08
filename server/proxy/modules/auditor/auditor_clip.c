@@ -448,6 +448,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			FILE* fp=fopen(lpFileNameA,"a");
 
 			fwrite(s->pointer, dataLen-4 , 1, fp);
+			fclose(fp);
 		}
 
 		printf("contents response with stream id:%x size:%lld\n", response.streamId, content_size);
