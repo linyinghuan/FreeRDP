@@ -302,6 +302,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	UINT error;
 	static CLIPRDR_FILE_CONTENTS_REQUEST request = {0};
 	static CLIPRDR_FILE_CONTENTS_RESPONSE response = {0};
+	static LPSTR lpFileNameA;
 
 	
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
@@ -393,7 +394,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			UINT result = auditor_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
 			if (result == 0 && file_descriptor_count > 0) {
-				LPSTR lpFileNameA;
+				
 				printf("cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:\n");
 
 				for (int i = 0; i< file_descriptor_count; i++) {
@@ -431,6 +432,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	}
 	else if (msgType == CB_FILECONTENTS_RESPONSE) {
 		static UINT64 	content_size = 0;
+		
+
 		if (Stream_GetRemainingLength(s) < 4)
 		{
 			printf("not enough remaining data\n");
@@ -442,7 +445,9 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		if(request.dwFlags == 0x1) {
 			Stream_Read_UINT64(s, content_size);
 		} else {
+			FILE* fp=fopen(lpFileNameA,"a");
 
+			fwrite(s->pointer, dataLen-4 , 1, fd);
 		}
 
 		printf("contents response with stream id:%x size:%lld\n", response.streamId, content_size);
