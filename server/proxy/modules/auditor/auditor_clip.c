@@ -314,14 +314,14 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			Stream_SetPosition(auditor_ctx->clip_stream, 0);
 			s = auditor_ctx->clip_stream;
 		}
-	}
-	else if (mode == AUDITOR_CLIENT) {
-		if (auditor_ctx->clip_client_stream != NULL) {
-			Stream_Free(auditor_ctx->clip_client_stream, TRUE);
+		else if (mode == AUDITOR_CLIENT) {
+			if (auditor_ctx->clip_client_stream != NULL) {
+				Stream_Free(auditor_ctx->clip_client_stream, TRUE);
+			}
+			auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
+			Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
+			s = auditor_ctx->clip_client_stream;
 		}
-		auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
-		Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
-		s = auditor_ctx->clip_client_stream;
 	}
 
 	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
