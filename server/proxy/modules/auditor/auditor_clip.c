@@ -38,15 +38,6 @@ static void cliprdr_free_format_list(CLIPRDR_FORMAT_LIST* formatList)
 #define CLIPRDR_FILEDESCRIPTOR_SIZE (4 + 32 + 4 + 16 + 8 + 8 + 520)
 #define CLIPRDR_MAX_FILE_SIZE (2U * 1024 * 1024 * 1024)
 
-static UINT64 filetime_to_uint64(FILETIME value)
-{
-	UINT64 converted = 0;
-	converted |= (UINT32)value.dwHighDateTime;
-	converted <<= 32;
-	converted |= (UINT32)value.dwLowDateTime;
-	return converted;
-}
-
 static FILETIME uint64_to_filetime(UINT64 value)
 {
 	FILETIME converted;
@@ -309,17 +300,31 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	UINT16 msgFlags;
 	UINT32 dataLen;
 	UINT error;
+	static CLIPRDR_FILE_CONTENTS_REQUEST request = {0};
+	static CLIPRDR_FILE_CONTENTS_RESPONSE response = {0};
 
-
-	if (pEvent->flags & CHANNEL_FLAG_FIRST)
-	{
-		if (auditor_ctx->clip_stream != NULL) {
-			Stream_Free(auditor_ctx->clip_stream, TRUE);
+	if(mode == AUDITOR_SERVER) {
+		if (pEvent->flags & CHANNEL_FLAG_FIRST)
+		{
+			if (auditor_ctx->clip_stream != NULL) {
+				Stream_Free(auditor_ctx->clip_stream, TRUE);
+			}
+			auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
+			Stream_SetPosition(auditor_ctx->clip_stream, 0);
 		}
-		auditor_ctx->clip_stream = Stream_New(NULL, pEvent->data_len);
-		Stream_SetPosition(auditor_ctx->clip_stream, 0);
+		s = auditor_ctx->clip_stream;
+	} else if (mode == AUDITOR_CLIENT) {
+		if (pEvent->flags & CHANNEL_FLAG_FIRST)
+		{
+			if (auditor_ctx->clip_client_stream != NULL) {
+				Stream_Free(auditor_ctx->clip_client_stream, TRUE);
+			}
+			auditor_ctx->clip_client_stream = Stream_New(NULL, pEvent->data_len);
+			Stream_SetPosition(auditor_ctx->clip_client_stream, 0);
+		}
+		s = auditor_ctx->clip_client_stream;
 	}
-	s = auditor_ctx->clip_stream;
+
 
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 	if (!(pEvent->flags & CHANNEL_FLAG_LAST)) {
@@ -390,7 +395,49 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy FILE: %s n", lpFileNameA);
 				}
 			}
+		} 
+	}
+	else if (msgType == CB_FILECONTENTS_REQUEST) {
+		if (Stream_GetRemainingLength(s) < 24)
+		{
+			printf("not enough remaining data\n");
+			goto finish;
 		}
+
+		request->haveClipDataId = FALSE;
+		Stream_Read_UINT32(s, request.streamId);      /* streamId (4 bytes) */
+		Stream_Read_UINT32(s, request.listIndex);     /* listIndex (4 bytes) */
+		Stream_Read_UINT32(s, request.dwFlags);       /* dwFlags (4 bytes) */
+		Stream_Read_UINT32(s, request.nPositionLow);  /* nPositionLow (4 bytes) */
+		Stream_Read_UINT32(s, request.nPositionHigh); /* nPositionHigh (4 bytes) */
+		Stream_Read_UINT32(s, request.cbRequested);   /* cbRequested (4 bytes) */
+
+		if (Stream_GetRemainingLength(s) >= 4)
+		{
+			Stream_Read_UINT32(s, request.clipDataId); /* clipDataId (4 bytes) */
+			request.haveClipDataId = TRUE;
+		}
+
+		printf("contents request with flag:%x\n stream id:%x\n", request.dwFlags, request.streamId);
+
+	}
+	else if (msgType == CB_FILECONTENTS_RESPONSE) {
+		static UINT64 	content_size = 0;
+		if (Stream_GetRemainingLength(s) < 4)
+		{
+			printf("not enough remaining data\n");
+			goto finish;
+		}
+
+		Stream_Read_UINT32(s, response.streamId);
+
+		if(request.dwFlags == 0x1) {
+			Stream_Read_UINT64(s, content_size);
+		} else {
+
+		}
+
+		printf("contents response with stream id:%x size:%lld\n", response.streamId, content_size);
 	}
 
 finish:

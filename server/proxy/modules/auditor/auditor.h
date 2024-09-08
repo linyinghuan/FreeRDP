@@ -43,6 +43,7 @@ typedef struct {
 	UINT32 formatID;
 	CLIPRDR_FORMAT_LIST formatList;
 	wStream* clip_stream;
+	wStream* clip_client_stream;
 
 	/* rdpdr data */
 	wStream* rdpdr_client_stream;
@@ -57,6 +58,13 @@ typedef struct {
 	AUDITOR_RDPDR_PATH_LIST_HEAD  g_rdpdrpath_list;
 
 } AUDITOR_CTX_DATA;
+
+
+typedef struct {
+	char*  session_id
+	UINT32 event_type;
+	time_t event_time;
+} AUDITOR_EVENT;
 
 BOOL auditor_set_plugin_data(proxyData* pData, void* data);
 void* auditor_get_plugin_data(proxyData* pData);
