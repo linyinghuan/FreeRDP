@@ -59,9 +59,8 @@ typedef struct {
 
 } AUDITOR_CTX_DATA;
 
-
 typedef struct {
-	char*  session_id
+	char*  session_id;
 	UINT32 event_type;
 	time_t event_time;
 } AUDITOR_EVENT;
