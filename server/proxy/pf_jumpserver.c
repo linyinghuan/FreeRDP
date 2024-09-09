@@ -191,7 +191,7 @@ void auditor_event_proc(jms_auditor_event *event)
 		case AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD:
 		case AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD:
 			switch (event->data_type) {
-				case ANDITOR_EVENT_DATA_TYPE_TEXT:
+				case AUDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
 					AuditCliTextEvent(event->sid,0, text_data->text, text_data->text_len);
 					break;
