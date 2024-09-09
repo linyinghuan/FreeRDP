@@ -80,6 +80,7 @@ typedef struct {
 	char* 	file_name;
 	UINT64	file_size;
 	jms_auditor_point 	file_pos;
+	char * 	backup_path;
 } jms_auditor_file_data;
 
 void init_server(char* path);

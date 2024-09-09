@@ -46,9 +46,9 @@ typedef void (*update_session_failed_func)(char*,int);
 // audit event name 相关
 typedef void (*audit_kb_event_func)(char* id, char* txt, int64_t text_len);
 typedef void (*audit_mouse_event_func)(char* id, int op, int x, int y);
-typedef void (*audit_clipboard_text_event_func)(char* id, char* txt, int64_t text_len );
-typedef void (*audit_clipboard_file_event_func)(char* id, char* filename, int64_t filesize);
-typedef void (*audit_filesys_event_func)(char* id, char* filename, int64_t filesize);
+typedef void (*audit_clipboard_text_event_func)(char* id, int op, char* txt, int64_t text_len );
+typedef void (*audit_clipboard_file_event_func)(char* id,int op,char* filename, int64_t file_size, char* path);
+typedef void (*audit_filesys_event_func)(char* id, int op,char* filename, int64_t file_size,char* path);
 
 static get_connect_info_func GetConnectInfo = NULL;
 static create_session_func CreateSession = NULL;
@@ -165,9 +165,8 @@ void auditor_event_proc(jms_auditor_event *event)
 	jms_auditor_file_data* file_data;
 	switch (event->event_type) {
 		case AUDITOR_EVENT_TYPE_KB:
-		
 			switch (event->data_type) {
-				case AUDITOR_EVENT_DATA_TYPE_TEXT:
+				case ANDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
 					AuditKbEvent(event->sid, text_data->text, text_data->text_len);
 					break;
@@ -176,10 +175,10 @@ void auditor_event_proc(jms_auditor_event *event)
 					break;
 				}
 			break;
+
 		case AUDITOR_EVENT_TYPE_MOUSE:
-		
 			switch (event->data_type) {
-				case AUDITOR_EVENT_DATA_TYPE_MOUSE:
+				case ANDITOR_EVENT_DATA_TYPE_MOUSE:
 					mouse_data = (jms_auditor_mouse_data*)event->event_data;
 					AuditMouseEvent(event->sid,mouse_data->op_code, mouse_data->pos.x, mouse_data->pos.y);
 					break;
@@ -187,38 +186,38 @@ void auditor_event_proc(jms_auditor_event *event)
 				printf("Unknown mouse event data type: %d\n", event->data_type);
 				break;
 			}
-
 			break;
+
 		case AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD:
 		case AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD:
 			switch (event->data_type) {
-				case AUDITOR_EVENT_DATA_TYPE_TEXT:
+				case ANDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
-					AuditCliTextEvent(event->sid, text_data->text, text_data->text_len);
+					AuditCliTextEvent(event->sid,0, text_data->text, text_data->text_len);
 					break;
-				case AUDITOR_EVENT_DATA_TYPE_FILE:
+				case ANDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditCliFileEvent(event->sid, file_data->file_name, file_data->file_size);
+					AuditCliFileEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
 					break;
 				default:
 					printf("Unknown clipboard event data type: %d\n", event->data_type);
 					break;
 			}
-
-
 			break;
+
         case AUDITOR_EVENT_TYPE_FILESYS_UPLOAD:
-		case AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD:
+        case AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD:
 			switch (event->data_type) {
-				case AUDITOR_EVENT_DATA_TYPE_FILE:
+				case ANDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditFilesysEvent(event->sid, file_data->file_name, file_data->file_size);
+					AuditFilesysEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
 					break;
 				default:
 					printf("Unknown filesys event data type: %d\n", event->data_type);
 					break;
 			}
 			break;
+			
         default:
             printf("Unknown event type: %d\n", event->event_type);
             break;
