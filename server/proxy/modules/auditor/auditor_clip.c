@@ -410,8 +410,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					printf("%s\n", lpFileNameA);
 					tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy FILE: %s n", lpFileNameA);
 					file_size = ((UINT64)(file_descriptor_array+i)->nFileSizeHigh << 32) |  (file_descriptor_array+i)->nFileSizeLow;
-					file_pos.x = (file_descriptor_array+i)->pointl.X;
-					file_pos.y = (file_descriptor_array+i)->pointl.Y;
+					file_pos.x = (file_descriptor_array+i)->pointl.x;
+					file_pos.y = (file_descriptor_array+i)->pointl.y;
 					if(mode == AUDITOR_SERVER)
 						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, lpFileNameA, file_size, file_pos);
 					else
