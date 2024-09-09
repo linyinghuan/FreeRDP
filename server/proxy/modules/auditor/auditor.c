@@ -102,8 +102,8 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	if(!event)
 		return;
 	memset(event_data, 0, sizeof(jms_auditor_text_data));
-	event->text = event_text;
-	event->text_len = strlen(event_text);
+	event_data->text = event_text;
+	event_data->text_len = strlen(event_text);
 
 	event->sid = event_sid;
 	event->user_name = NULL;
