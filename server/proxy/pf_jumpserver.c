@@ -46,9 +46,9 @@ typedef void (*update_session_failed_func)(char*,int);
 // audit event name 相关
 typedef void (*audit_kb_event_func)(char* id, char* txt, int64_t text_len);
 typedef void (*audit_mouse_event_func)(char* id, int op, int x, int y);
-typedef void (*audit_clipboard_text_event_func)(char* id, int op, char* txt, int64_t text_len );
-typedef void (*audit_clipboard_file_event_func)(char* id,int op,char* filename, int64_t text_len);
-typedef void (*audit_filesys_event_func)(char* id, int op,char* filename, int64_t text_len,char* path);
+typedef void (*audit_clipboard_text_event_func)(char* id, char* txt, int64_t text_len );
+typedef void (*audit_clipboard_file_event_func)(char* id, char* filename, int64_t filesize);
+typedef void (*audit_filesys_event_func)(char* id, char* filename, int64_t filesize);
 
 static get_connect_info_func GetConnectInfo = NULL;
 static create_session_func CreateSession = NULL;
