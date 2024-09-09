@@ -150,7 +150,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 		while(pNext) {
 			printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, pNext->path->m_path, pNext->path->size, file_pos, file_pos);
+			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, pNext->path->m_path, pNext->path->size, file_pos);
 			pNext = pNext->next;
 		}
 	} else {
@@ -160,7 +160,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
 				printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 				tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-				auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, pNext->path->m_path, pNext->path->size, file_pos, file_pos);
+				auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, pNext->path->m_path, pNext->path->size, file_pos);
 			}
 			pNext = pNext->next;
 		}
@@ -538,7 +538,8 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					path_info = malloc(sizeof(AUDITOR_RDPDR_PATH));
 					memset(path_info, 0, sizeof(AUDITOR_RDPDR_PATH));
 					path_info->m_path = lpFileNameA;
-					path_info->size = ((UINT64)(AllocationSize2 << 32) | AllocationSize);
+					path_info->size = AllocationSize2;
+					path_info->size = (path_info->size << 32) | AllocationSize;
 					if (FileAttributes | 0x00000010) {
 						path_info->m_isDir = 1;
 					}
