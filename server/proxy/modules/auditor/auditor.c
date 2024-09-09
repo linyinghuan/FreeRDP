@@ -116,7 +116,7 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	auditor_event_proc(event);
 }
 
-void auditor_rdpdr_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
+void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
 								UINT64 file_size, jms_auditor_point file_pos)
 {
 	jms_auditor_event *event;
