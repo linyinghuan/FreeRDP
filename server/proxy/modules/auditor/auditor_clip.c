@@ -465,7 +465,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			fclose(fp);
 		}
 
-		printf("contents response with stream id:%x size:%lld\n", response.streamId, content_size);
+		printf("contents response with stream id:%x size:%ld\n", response.streamId, content_size);
 	}
 
 finish:

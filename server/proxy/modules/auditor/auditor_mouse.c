@@ -3,12 +3,7 @@
 BOOL auditor_mouse_event_handler(proxyData* pData, void* param)
 {
 	proxyMouseEventInfo* event_data = (proxyMouseEventInfo*)param;
-	jms_auditor_point pos =  {0};
-
-	AUDITOR_MOUSE_OP_LEFT_CLICK = 1,
-	AUDITOR_MOUSE_OP_RIGHT_CLICK,
-	AUDITOR_MOUSE_OP_MID_CLICK,
-	AUDITOR_MOUSE_OP_WHEEL_CLICK,
+	jms_auditor_point pos = {0};
 
 	if (event_data == NULL)
 		return FALSE;
