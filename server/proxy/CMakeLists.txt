@@ -55,6 +55,8 @@ set(${MODULE_PREFIX}_SRCS
   pf_rdpsnd.h
   pf_capture.c
   pf_capture.h
+  pf_jumpserver.c
+  pf_jumpserver.h  
   pf_log.h
   )
 

@@ -164,10 +164,10 @@ void auditor_event_proc(jms_auditor_event *event)
 	jms_auditor_mouse_data* mouse_data;
 	jms_auditor_file_data* file_data;
 	switch (event->event_type) {
-		case ANDITOR_EVENT_TYPE_KB:
+		case AUDITOR_EVENT_TYPE_KB:
 		
 			switch (event->data_type) {
-				case ANDITOR_EVENT_DATA_TYPE_TEXT:
+				case AUDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
 					AuditKbEvent(event->sid, text_data->text, text_data->text_len);
 					break;
@@ -176,10 +176,10 @@ void auditor_event_proc(jms_auditor_event *event)
 					break;
 				}
 			break;
-		case ANDITOR_EVENT_TYPE_MOUSE:
+		case AUDITOR_EVENT_TYPE_MOUSE:
 		
 			switch (event->data_type) {
-				case ANDITOR_EVENT_DATA_TYPE_MOUSE:
+				case AUDITOR_EVENT_DATA_TYPE_MOUSE:
 					mouse_data = (jms_auditor_mouse_data*)event->event_data;
 					AuditMouseEvent(event->sid,mouse_data->op_code, mouse_data->pos.x, mouse_data->pos.y);
 					break;
@@ -189,13 +189,13 @@ void auditor_event_proc(jms_auditor_event *event)
 			}
 
 			break;
-		case ANDITOR_EVENT_TYPE_CLIPBOARD:
+		case AUDITOR_EVENT_TYPE_CLIPBOARD:
 			switch (event->data_type) {
-				case ANDITOR_EVENT_DATA_TYPE_TEXT:
+				case AUDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
 					AuditCliTextEvent(event->sid,0, text_data->text, text_data->text_len);
 					break;
-				case ANDITOR_EVENT_DATA_TYPE_FILE:
+				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
 					AuditCliFileEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
 					break;
@@ -206,9 +206,9 @@ void auditor_event_proc(jms_auditor_event *event)
 
 
 			break;
-        case ANDITOR_EVENT_TYPE_FILESYS:
+        case AUDITOR_EVENT_TYPE_FILESYS:
 			switch (event->data_type) {
-				case ANDITOR_EVENT_DATA_TYPE_FILE:
+				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
 					AuditFilesysEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
 					break;
