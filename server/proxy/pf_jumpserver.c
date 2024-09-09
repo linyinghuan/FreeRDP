@@ -194,11 +194,11 @@ void auditor_event_proc(jms_auditor_event *event)
 			switch (event->data_type) {
 				case AUDITOR_EVENT_DATA_TYPE_TEXT:
 					text_data = (jms_auditor_text_data*)event->event_data;
-					AuditCliTextEvent(event->sid,0, text_data->text, text_data->text_len);
+					AuditCliTextEvent(event->sid, text_data->text, text_data->text_len);
 					break;
 				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditCliFileEvent(event->sid,0, file_data->file_name, file_data->file_size);
+					AuditCliFileEvent(event->sid, file_data->file_name, file_data->file_size);
 					break;
 				default:
 					printf("Unknown clipboard event data type: %d\n", event->data_type);
@@ -212,7 +212,7 @@ void auditor_event_proc(jms_auditor_event *event)
 			switch (event->data_type) {
 				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditFilesysEvent(event->sid,0, file_data->file_name, file_data->file_size);
+					AuditFilesysEvent(event->sid, file_data->file_name, file_data->file_size);
 					break;
 				default:
 					printf("Unknown filesys event data type: %d\n", event->data_type);
