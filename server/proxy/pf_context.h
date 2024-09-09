@@ -56,7 +56,21 @@ struct p_server_context
 	DispServerContext* disp;
 	CliprdrServerContext* cliprdr;
 	RdpsndServerContext* rdpsnd;
-
+	char* uuid;
+	int enable_connect;
+	int enable_upload;
+	int enable_download;
+	int enable_paste;
+	int enable_copy;
+	int need_recording;
+	int64_t expire_time;
+	int64_t expire_session_time;
+	int64_t max_idle_seconds;
+	int64_t last_activity_time;
+	char* sid;
+	UINT16 surface_id;
+	BYTE* primary_buffer;
+	
 	HANDLE* vc_handles; /* static virtual channels open handles */
 	wHashTable* vc_ids; /* channel_name -> channel_id map */
 };

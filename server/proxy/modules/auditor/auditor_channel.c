@@ -17,6 +17,10 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		auditor_set_plugin_data(pdata, auditor_ctx);
 	}
 
+	if(NULL == pdata->ps->sid) {
+		pdata->ps->sid = "test-server";
+	}
+
 	return TRUE;
 }
 

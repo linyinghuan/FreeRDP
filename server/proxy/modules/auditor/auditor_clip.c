@@ -385,12 +385,19 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 				goto finish;
 			printf("cliboard_filter_server_Event C++ demo plugin: CF_UNICODETEXT:%s\n", lpCopyA);
 			tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy UNICODETEXT: %s\n", lpCopyA);
+			if(mode == AUDITOR_SERVER)
+				auditor_text_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, lpCopyA);
+			else
+				auditor_text_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->sid, lpCopyA);
 
 		}
 		else if (auditor_ctx->formatID == CB_FORMAT_TEXTURILIST  || 
 			( iFoundIndex != -1 && 0 == strncmp(auditor_ctx->formatList.formats[iFoundIndex].formatName, "FileGroupDescriptorW", strlen("FileGroupDescriptorW") ))/*clientformatID == 0xc07d*/) {
 			FILEDESCRIPTORW* file_descriptor_array;
 			UINT32 file_descriptor_count;
+			UINT64 file_size;
+			jms_auditor_point file_pos;
+
 			UINT result = auditor_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
 			if (result == 0 && file_descriptor_count > 0) {
@@ -402,6 +409,13 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 						goto finish;
 					printf("%s\n", lpFileNameA);
 					tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy FILE: %s n", lpFileNameA);
+					file_size = ((UINT64)(file_descriptor_array+i)->nFileSizeHigh << 32) |  (file_descriptor_array+i)->nFileSizeLow;
+					file_pos.x = (file_descriptor_array+i)->pointl.X;
+					file_pos.y = (file_descriptor_array+i)->pointl.Y;
+					if(mode == AUDITOR_SERVER)
+						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->sid, lpFileNameA, file_size, file_pos);
+					else
+						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->sid, lpFileNameA, file_size, file_pos);					
 				}
 			}
 		} 

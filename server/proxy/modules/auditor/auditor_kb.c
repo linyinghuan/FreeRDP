@@ -189,7 +189,8 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 			else
 				sprintf(buf,"input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);
 			printf("%s", buf);
-			tlog(TLOG_INFO, pData->session_id, 0, "[keyboard] input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);			
+			tlog(TLOG_INFO, pData->ps->sid, 0, "[keyboard] input: %s%s%s\n", auditor_ctx->ctrl_flag?"ctrl + ":" ", auditor_ctx->alt_flag?"alt + ":" ", pCodeMap->key);
+			auditor_text_event_produce(AUDITOR_EVENT_TYPE_KB, pData->ps->sid, buf);		
 		}
 	}
 

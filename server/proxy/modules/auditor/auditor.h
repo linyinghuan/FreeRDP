@@ -3,11 +3,13 @@
 
 #include <errno.h>
 #include "modules_api.h"
+#include "pf_jumpserver.h"
 #include "tlog.h"
 
 typedef struct {
 	char *m_path;
 	int m_isDir;
+	UINT64 size;
 } AUDITOR_RDPDR_PATH;
 
 typedef struct auditor_rdpdr_path_list_node {
@@ -59,14 +61,13 @@ typedef struct {
 
 } AUDITOR_CTX_DATA;
 
-typedef struct {
-	char*  session_id;
-	UINT32 event_type;
-	time_t event_time;
-} AUDITOR_EVENT;
-
 BOOL auditor_set_plugin_data(proxyData* pData, void* data);
 void* auditor_get_plugin_data(proxyData* pData);
+
+void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, char *text);
+void auditor_rdpdr_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
+								UINT64 file_size, jms_auditor_point file_pos);
+void auditor_mouse_file_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos);
 
 #define TAG MODULE_TAG("auditor")
 

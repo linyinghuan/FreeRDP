@@ -4,4 +4,5 @@
 #include "auditor.h"
 
 BOOL auditor_mouse_event_handler(proxyData* pdata, void* param);
+
 #endif
