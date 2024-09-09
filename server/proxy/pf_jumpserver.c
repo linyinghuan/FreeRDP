@@ -47,7 +47,7 @@ typedef void (*update_session_failed_func)(char*,int);
 typedef void (*audit_kb_event_func)(char* id, char* txt, int64_t text_len);
 typedef void (*audit_mouse_event_func)(char* id, int op, int x, int y);
 typedef void (*audit_clipboard_text_event_func)(char* id, int op, char* txt, int64_t text_len );
-typedef void (*audit_clipboard_file_event_func)(char* id,int op,char* filename, int64_t text_len, char* path);
+typedef void (*audit_clipboard_file_event_func)(char* id,int op,char* filename, int64_t text_len);
 typedef void (*audit_filesys_event_func)(char* id, int op,char* filename, int64_t text_len,char* path);
 
 static get_connect_info_func GetConnectInfo = NULL;
@@ -198,7 +198,7 @@ void auditor_event_proc(jms_auditor_event *event)
 					break;
 				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditCliFileEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
+					AuditCliFileEvent(event->sid,0, file_data->file_name, file_data->file_size);
 					break;
 				default:
 					printf("Unknown clipboard event data type: %d\n", event->data_type);
@@ -212,7 +212,7 @@ void auditor_event_proc(jms_auditor_event *event)
 			switch (event->data_type) {
 				case AUDITOR_EVENT_DATA_TYPE_FILE:
 					file_data = (jms_auditor_file_data*)event->event_data;
-					AuditFilesysEvent(event->sid,0, file_data->file_name, file_data->file_size, file_data->backup_path);
+					AuditFilesysEvent(event->sid,0, file_data->file_name, file_data->file_size);
 					break;
 				default:
 					printf("Unknown filesys event data type: %d\n", event->data_type);
