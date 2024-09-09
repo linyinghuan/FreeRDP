@@ -81,6 +81,8 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	char *event_sid;
 	char *event_text;
 
+	printf("produce text event type:%d sid:%s text:%s", event_type, sid, text);
+
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
 		return;
@@ -122,6 +124,8 @@ void auditor_rdpdr_file_event_produce(jms_auditor_event_type event_type, char *s
 	char *event_sid;
 	char *event_file_name;
 
+	printf("produce file event type:%d sid:%s file name:%s", event_type, sid, file_name);
+
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
 		return;
@@ -161,6 +165,8 @@ void auditor_mouse_file_event_produce(jms_auditor_event_type event_type, char *s
 	jms_auditor_event *event;
 	jms_auditor_mouse_data *event_data;
 	char *event_sid;
+
+	printf("produce mouse event type:%d sid:%s op:%d", event_type, sid, op_code);
 
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
