@@ -174,18 +174,18 @@ static BOOL pf_config_load_channels(wIniFile* ini, proxyConfig* config)
 	}
 
 	config->AuditorEnable = pf_config_get_bool(ini, "Channels", "AuditorEnable");
-	config->AuditorFileDumpEnable = pf_config_get_bool(ini, "Channels", "AuditorFileDumpEnable");
-	if(config->AuditorFileDumpEnable) {
+	config->AuditorDumpFileEnable = pf_config_get_bool(ini, "Channels", "AuditorFileDumpEnable");
+	if(config->AuditorDumpFileEnable) {
 		auditor_file_path = pf_config_get_str(ini, "Channels", "AuditorFileDumpPath");
 		if (!auditor_file_path) {
 			WLog_ERR(TAG, "Need config dump file path!");
 			return FALSE;
 		}
-		config->AuditorFileDumpPath = _strdup(auditor_file_path);
-		if (!config->AuditorFileDumpPath)
+		config->AuditorDumpFilePath = _strdup(auditor_file_path);
+		if (!config->AuditorDumpFilePath)
 			return FALSE;
 		if(access(config->AuditorFileDumpPath, W_OK)){
-			WLog_ERR(TAG, "Can not access dump file path: %s!", config->AuditorFileDumpPath);
+			WLog_ERR(TAG, "Can not access dump file path: %s!", config->AuditorDumpFilePath);
 			return FALSE;
 		}
 	}

@@ -63,8 +63,8 @@ struct proxy_config
 	BOOL AuditorEnable;
 	char** Auditor;
 	size_t AuditorCount;
-	BOOL  AuditorFileDumpEnable;
-	char* AuditorFileDumpPath;
+	BOOL  AuditorDumpFileEnable;
+	char* AuditorDumpFilePath;
 
 	/* clipboard specific settings */
 	BOOL TextOnly;
