@@ -24,7 +24,7 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 
 	if(TRUE == pdata->config->AuditorDumpFileEnable) {
 		sprintf(auditor_ctx->dump_file_path, "%s\/", pdata->config->AuditorDumpFilePath);
-		snprintf(auditor_ctx->dump_file_path, "%s", pdata->ps->uuid);
+		sprintf(auditor_ctx->dump_file_path, "%s", pdata->ps->uuid);
 		mkdir(auditor_ctx->dump_file_path,0777);
 	}	
 
@@ -36,7 +36,7 @@ BOOL auditor_client_channel_handler(proxyData* pdata, void* context)
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
 	if(0 == g_auditor_enable)
-		return;
+		return TRUE;
 
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
 
@@ -65,7 +65,7 @@ BOOL auditor_server_channel_handler(proxyData* pdata, void* context)
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
 
 	if(0 == g_auditor_enable)
-		return;
+		return TRUE;
 
 	auditor_ctx = auditor_get_plugin_data(pdata);
 	if(NULL == auditor_ctx) {
