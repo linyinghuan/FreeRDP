@@ -149,13 +149,15 @@ static BOOL pf_config_load_target(wIniFile* ini, proxyConfig* config)
 
 static BOOL pf_config_load_channels(wIniFile* ini, proxyConfig* config)
 {
+	const char* auditor_file_path;
+
 	config->GFX = pf_config_get_bool(ini, "Channels", "GFX");
 	config->DisplayControl = pf_config_get_bool(ini, "Channels", "DisplayControl");
 	config->Clipboard = pf_config_get_bool(ini, "Channels", "Clipboard");
 	config->AudioOutput = pf_config_get_bool(ini, "Channels", "AudioOutput");
 	config->RemoteApp = pf_config_get_bool(ini, "Channels", "RemoteApp");
 	config->Passthrough = CommandLineParseCommaSeparatedValues(
-	    pf_config_get_str(ini, "Channels", "Passthrough"), &config->PassthroughCount);
+	pf_config_get_str(ini, "Channels", "Passthrough"), &config->PassthroughCount);
 
 	{
 		/* validate channel name length */
@@ -168,6 +170,23 @@ static BOOL pf_config_load_channels(wIniFile* ini, proxyConfig* config)
 				WLog_ERR(TAG, "passthrough channel: %s: name too long!", config->Passthrough[i]);
 				return FALSE;
 			}
+		}
+	}
+
+	config->AuditorEnable = pf_config_get_bool(ini, "Channels", "AuditorEnable");
+	config->AuditorFileDumpEnable = pf_config_get_bool(ini, "Channels", "AuditorFileDumpEnable");
+	if(config->AuditorFileDumpEnable) {
+		auditor_file_path = pf_config_get_str(ini, "Channels", "AuditorFileDumpPath");
+		if (!auditor_file_path) {
+			WLog_ERR(TAG, "Need config dump file path!");
+			return FALSE;
+		}
+		config->AuditorFileDumpPath = _strdup(auditor_file_path);
+		if (!config->AuditorFileDumpPath)
+			return FALSE;
+		if(access(config->AuditorFileDumpPath, W_OK)){
+			WLog_ERR(TAG, "Can not access dump file path: %s!", config->AuditorFileDumpPath);
+			return FALSE;
 		}
 	}
 

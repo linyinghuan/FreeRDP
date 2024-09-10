@@ -27,6 +27,8 @@
 #define PLUGIN_NAME "auditor"
 #define PLUGIN_DESC "proxy data/event auditor plugin"
 
+UINT32 g_auditor_enable = 1;
+char g_dump_file_path[1024] = {0};
 
 static proxyPluginsManager* g_plugins_manager = NULL;
 

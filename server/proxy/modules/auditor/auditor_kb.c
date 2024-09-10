@@ -108,6 +108,9 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 	BOOL extend_code = FALSE;
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
+	if(0 == g_auditor_enable)
+		return;	
+
 	auditor_ctx = auditor_get_plugin_data(pData);
 	if(NULL == auditor_ctx) {
 		printf("keyboard event without auditor ctx\n");

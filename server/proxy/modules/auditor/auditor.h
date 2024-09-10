@@ -6,6 +6,8 @@
 #include "pf_jumpserver.h"
 #include "tlog.h"
 
+extern UINT32 g_auditor_enable;
+
 typedef struct {
 	char *m_path;
 	int m_isDir;
@@ -34,6 +36,8 @@ typedef struct  {
 } AUDITOR_RDPDR_PATH_TABLE_HEAD;
 
 typedef struct {
+	char dump_file_path[512];
+
 	/* keyboard data */
 	int ctrl_flag;
 	int shift_flag;

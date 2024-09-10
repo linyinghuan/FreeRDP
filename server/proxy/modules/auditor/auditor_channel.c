@@ -8,6 +8,11 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
+	if(FALSE == pdata->config->AuditorEnable) {
+		g_auditor_enable = 0;
+		return TRUE;
+	}
+
 	printf("session %s server channel init\n", pdata->session_id);
 
 	if(NULL == auditor_get_plugin_data(pdata)) {
@@ -17,9 +22,11 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		auditor_set_plugin_data(pdata, auditor_ctx);
 	}
 
-	if(NULL == pdata->ps->sid) {
-		pdata->ps->sid = "test-server";
-	}
+	if(TRUE == pdata->config->AuditorDumpFileEnable) {
+		sprintf(auditor_ctx->dump_file_path, "%s\/", pdata->config->AuditorDumpFilePath);
+		snprintf(auditor_ctx->dump_file_path, "%s", pdata->ps->uuid);
+		mkdir(auditor_ctx->dump_file_path,0777);
+	}	
 
 	return TRUE;
 }
@@ -27,6 +34,9 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 BOOL auditor_client_channel_handler(proxyData* pdata, void* context)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
+
+	if(0 == g_auditor_enable)
+		return;
 
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
 
@@ -53,6 +63,9 @@ BOOL auditor_server_channel_handler(proxyData* pdata, void* context)
 {
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 	proxyChannelDataEventInfo* pEvent = (proxyChannelDataEventInfo *)context;
+
+	if(0 == g_auditor_enable)
+		return;
 
 	auditor_ctx = auditor_get_plugin_data(pdata);
 	if(NULL == auditor_ctx) {

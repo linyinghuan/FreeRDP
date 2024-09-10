@@ -422,6 +422,10 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		} 
 	}
 	else if (msgType == CB_FILECONTENTS_REQUEST) {
+
+		if(FALSE == pData->config->AuditorDumpFileEnable)
+			return;
+
 		if (Stream_GetRemainingLength(s) < 24)
 		{
 			printf("not enough remaining data\n");
@@ -448,6 +452,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	else if (msgType == CB_FILECONTENTS_RESPONSE) {
 		static UINT64 	content_size = 0;
 		
+		if(FALSE == pData->config->AuditorDumpFileEnable)
+			return;
 
 		if (Stream_GetRemainingLength(s) < 4)
 		{
@@ -460,10 +466,17 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		if(request.dwFlags == 0x1) {
 			Stream_Read_UINT64(s, content_size);
 		} else {
-			FILE* fp=fopen(lpFileNameA,"a");
+			char file_path[512] = {0};
 
-			fwrite(s->pointer, dataLen-4 , 1, fp);
-			fclose(fp);
+			snprintf(file_path, "%s\/", auditor_ctx->dump_file_path);
+			snprintf(file_path, "%s", lpFileNameA);
+			FILE* fp=fopen(file_path,"a");
+
+			if(fp) {
+				fwrite(s->pointer, dataLen-4 , 1, fp);
+				fclose(fp);				
+			}
+
 		}
 
 		printf("contents response with stream id:%x size:%ld\n", response.streamId, content_size);
