@@ -184,7 +184,7 @@ static BOOL pf_config_load_channels(wIniFile* ini, proxyConfig* config)
 		config->AuditorDumpFilePath = _strdup(auditor_file_path);
 		if (!config->AuditorDumpFilePath)
 			return FALSE;
-		if(access(config->AuditorFileDumpPath, W_OK)){
+		if(access(config->AuditorDumpFilePath, W_OK)){
 			WLog_ERR(TAG, "Can not access dump file path: %s!", config->AuditorDumpFilePath);
 			return FALSE;
 		}
