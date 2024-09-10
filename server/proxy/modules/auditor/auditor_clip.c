@@ -471,7 +471,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		} else {
 			char file_path[1024] = {0};
 
-			sprintf(file_path, "%s/%s", auditor_ctx->dump_file_path, lpFileNameA);
+			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
 			FILE* fp=fopen(file_path,"a");
 
 			if(fp) {
