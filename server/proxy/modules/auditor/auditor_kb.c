@@ -169,7 +169,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 	}
 
 
-	if (event_data->flags & KBD_FLAGS_RELEASE) {
+	if ((event_data->flags & KBD_FLAGS_RELEASE) && (event_data->rdp_scan_code != RDP_SCANCODE_TAB)) {
 		char buf[1024] = {0};
 
 		pCodeMap = code_map_table[RDP_SCANCODE_CODE(event_data->rdp_scan_code)];

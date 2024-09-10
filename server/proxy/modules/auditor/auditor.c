@@ -125,7 +125,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	char *event_sid;
 	char *event_file_name;
 
-	printf("produce file event type:%d sid:%s file name:%s", event_type, sid, file_name);
+	printf("produce file event type:%d sid:%s file name:%s file path:%s\n", event_type, sid, file_name, file_path);
 
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
