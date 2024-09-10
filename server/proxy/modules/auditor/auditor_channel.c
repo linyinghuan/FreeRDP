@@ -23,10 +23,9 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 	}
 
 	if(TRUE == pdata->config->AuditorDumpFileEnable) {
-		sprintf(auditor_ctx->dump_file_path, "%s/", pdata->config->AuditorDumpFilePath);
-
-		printf("AuditorDumpFilePath:%s\n", pdata->config->AuditorDumpFilePath);
+		sprintf(auditor_ctx->dump_file_path, "%s/%s/", pdata->config->AuditorDumpFilePath, pdata->ps->uuid);
 		printf("session file path:%s\n", auditor_ctx->dump_file_path);
+
 		mkdir(auditor_ctx->dump_file_path,0777);
 	}	
 

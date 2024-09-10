@@ -42,6 +42,9 @@ struct proxy_config
 	BOOL Keyboard;
 	BOOL Mouse;
 
+	/*  proxy 支持 TlsV1.3  */
+	BOOL EnforceTlsV13;
+
 	/* server security */
 	BOOL ServerTlsSecurity;
 	BOOL ServerRdpSecurity;

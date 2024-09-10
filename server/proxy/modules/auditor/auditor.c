@@ -127,6 +127,21 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 
 	printf("produce file event type:%d sid:%s file name:%s file path:%s\n", event_type, sid, file_name, file_path);
 
+	if(!sid) {
+		printf("sid is NULL\n");
+		return;
+	}
+
+	if(!file_name) {
+		printf("file_name is NULL\n");
+		return;
+	}	
+
+	if(!file_path) {
+		printf("file_path is NULL\n");
+		return;
+	}	
+
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
 		return;
@@ -151,6 +166,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	event_data->file_name = file_name;
 	event_data->file_size = file_size;
 	event_data->file_pos = file_pos;
+	event_data->backup_path = file_path;
 
 	event->sid = event_sid;
 	event->user_name = NULL;

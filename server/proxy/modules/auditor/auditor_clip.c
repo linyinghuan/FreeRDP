@@ -405,6 +405,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 				printf("cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:\n");
 
 				for (int i = 0; i< file_descriptor_count; i++) {
+					char file_path[1024] = {0};
+
 					if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 						goto finish;
 					printf("%s\n", lpFileNameA);
@@ -413,10 +415,11 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
 					file_pos.x = (file_descriptor_array+i)->pointl.x;
 					file_pos.y = (file_descriptor_array+i)->pointl.y;
+					sprintf(file_path, "%s/%s", auditor_ctx->dump_file_path, lpFileNameA);
 					if(mode == AUDITOR_SERVER)
-						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, pData->config->AuditorDumpFilePath);
+						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, file_path);
 					else
-						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, pData->config->AuditorDumpFilePath);					
+						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, file_path);					
 				}
 			}
 		} 
@@ -468,7 +471,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		} else {
 			char file_path[1024] = {0};
 
-			sprintf(file_path, "%s/%s/%s", auditor_ctx->dump_file_path, pData->ps->uuid, lpFileNameA);
+			sprintf(file_path, "%s/%s", auditor_ctx->dump_file_path, lpFileNameA);
 			FILE* fp=fopen(file_path,"a");
 
 			if(fp) {
