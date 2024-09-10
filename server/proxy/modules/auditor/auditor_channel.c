@@ -23,7 +23,7 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 	}
 
 	if(TRUE == pdata->config->AuditorDumpFileEnable) {
-		sprintf(auditor_ctx->dump_file_path, "%s\/", pdata->config->AuditorDumpFilePath);
+		sprintf(auditor_ctx->dump_file_path, "%s/", pdata->config->AuditorDumpFilePath);
 		sprintf(auditor_ctx->dump_file_path, "%s", pdata->ps->uuid);
 		mkdir(auditor_ctx->dump_file_path,0777);
 	}	

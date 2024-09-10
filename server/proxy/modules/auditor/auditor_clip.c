@@ -466,9 +466,9 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		if(request.dwFlags == 0x1) {
 			Stream_Read_UINT64(s, content_size);
 		} else {
-			char file_path[512] = {0};
+			char file_path[1024] = {0};
 
-			sprintf(file_path, "%s\/", auditor_ctx->dump_file_path);
+			sprintf(file_path, "%s/", auditor_ctx->dump_file_path);
 			sprintf(file_path, "%s", lpFileNameA);
 			FILE* fp=fopen(file_path,"a");
 
