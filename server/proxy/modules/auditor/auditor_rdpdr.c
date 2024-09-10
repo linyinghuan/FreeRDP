@@ -150,7 +150,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 		while(pNext) {
 			printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, dump_file_path);
+			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
 			pNext = pNext->next;
 		}
 	} else {
@@ -160,7 +160,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
 				printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 				tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-				auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, dump_file_path);
+				auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
 			}
 			pNext = pNext->next;
 		}
@@ -403,7 +403,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		if (IoStatus == 0) {
 			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", auditor_ctx->g_createNewFilePath);
 			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_createNewFilePath);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, dump_file_path);
+			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);
 		}
 	}
 
