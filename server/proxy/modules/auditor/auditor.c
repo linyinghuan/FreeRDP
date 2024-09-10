@@ -28,7 +28,6 @@
 #define PLUGIN_DESC "proxy data/event auditor plugin"
 
 UINT32 g_auditor_enable = 1;
-char g_dump_file_path[1024] = {0};
 
 static proxyPluginsManager* g_plugins_manager = NULL;
 
@@ -119,7 +118,7 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 }
 
 void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
-								UINT64 file_size, jms_auditor_point file_pos)
+								UINT64 file_size, jms_auditor_point file_pos, char *file_path)
 {
 	jms_auditor_event *event;
 	jms_auditor_file_data *event_data;
@@ -162,7 +161,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	auditor_event_proc(event);
 }
 
-void auditor_mouse_file_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos)
+void auditor_mouse_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos)
 {
 	jms_auditor_event *event;
 	jms_auditor_mouse_data *event_data;

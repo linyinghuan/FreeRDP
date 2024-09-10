@@ -70,8 +70,8 @@ void* auditor_get_plugin_data(proxyData* pData);
 
 void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, char *text);
 void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
-								UINT64 file_size, jms_auditor_point file_pos);
-void auditor_mouse_file_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos);
+								UINT64 file_size, jms_auditor_point file_pos, char *file_path);
+void auditor_mouse_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos);
 
 #define TAG MODULE_TAG("auditor")
 
