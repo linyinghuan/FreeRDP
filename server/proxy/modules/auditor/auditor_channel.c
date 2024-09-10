@@ -28,7 +28,7 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 
 		printf("AuditorDumpFilePath:%s\n", pdata->config->AuditorDumpFilePath);
 		printf("session uuid:%s\n", pdata->ps->uuid);
-		printf("session file path:%s\n", auditor_ctx->dump_file_path)
+		printf("session file path:%s\n", auditor_ctx->dump_file_path);
 		mkdir(auditor_ctx->dump_file_path,0777);
 	}	
 
