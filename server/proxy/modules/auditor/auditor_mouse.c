@@ -6,10 +6,10 @@ BOOL auditor_mouse_event_handler(proxyData* pData, void* param)
 	jms_auditor_point pos = {0};
 
 	if (event_data == NULL)
-		return FALSE;
-	
+		return TRUE;
+
 	if(0 == g_auditor_enable)
-		return;	
+		return TRUE;	
 
 	if (event_data->flags & PTR_FLAGS_DOWN) {
 		printf("mouse: %04X\n", event_data->flags);

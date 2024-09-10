@@ -109,7 +109,7 @@ BOOL auditor_keyboard_event_handler(proxyData* pData, void* param)
 	AUDITOR_CTX_DATA *auditor_ctx = NULL;
 
 	if(0 == g_auditor_enable)
-		return;	
+		return TRUE;	
 
 	auditor_ctx = auditor_get_plugin_data(pData);
 	if(NULL == auditor_ctx) {
