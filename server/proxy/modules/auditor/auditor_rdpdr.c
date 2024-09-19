@@ -152,9 +152,6 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 			//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 			//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
 			//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
-			//add fileindex-path map
-			printf("++++++++++++++ add file id map %d, path:[%s]\n", pNext->path->fileIndex, pNext->path->m_path);
-			hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			pNext = pNext->next;
 		}
 
@@ -163,22 +160,11 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 		pNext = list;
 		pOldNext = pOldList;
 
-		//remove old fileindex-path map
-		while(pOldNext) {
-			printf("++++++++++++++ del file id map %d\n", pOldNext->path->fileIndex);
-			hash_table_delete(file_map, pOldNext->path->fileIndex);
-			pOldNext = pOldNext->next;
-		}
-
-
 		while(pNext) {
 			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
 				//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
 				//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
 				//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
-				//add new fileindex-path map
-				printf("++++++++++++++ add file id map %d, path:[%s]\n", pNext->path->fileIndex, pNext->path->m_path);
-				hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			}
 			pNext = pNext->next;
 		}
@@ -295,9 +281,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
-									auditor_ctx->g_createNewFilePath = lpFileNameA;
-									auditor_ctx->g_createNewFileNeed = true;
-									auditor_ctx->g_createNewFileAttributes = FileAttributes;
+								auditor_ctx->g_createNewFilePath = lpFileNameA;
+								auditor_ctx->g_createNewFileNeed = true;
+								auditor_ctx->g_createNewFileAttributes = FileAttributes;
 								//free(lpFileNameA);
 							}
 						}
@@ -349,9 +335,20 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							break;
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
-						printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+						if(auditor_ctx->g_createNewFileNeed == true) {
+							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+							auditor_ctx->g_createNewFileNeed = false;
+							free(auditor_ctx->g_createNewFilePath);
+							auditor_ctx->g_createNewFilePath = NULL;
+						}
+						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
-						printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+						if(auditor_ctx->g_createNewFileNeed == true) {
+							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+							auditor_ctx->g_createNewFileNeed = false;
+							free(auditor_ctx->g_createNewFilePath);
+							auditor_ctx->g_createNewFilePath = NULL;
+						}
 					}
 				}
 				break;
