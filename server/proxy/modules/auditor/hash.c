@@ -48,7 +48,7 @@ int hash_table_insert(hash_table *table, uint32_t key, void *value)
 	return 0;
 }
 
-hash_node* hash_table_search(hash_table *table, uint32_t key)
+char* hash_table_search(hash_table *table, uint32_t key)
 {
 	unsigned long index = key % table->size;
 	hash_node *node = &table->bucket[index];
@@ -75,7 +75,7 @@ void hash_table_delete(hash_table *table, uint32_t key)
 	hash_node *node = &table->bucket[index];
 
 	if(!node->used) {
-		return NULL;
+		return;
 	}
 
 	while(key != node->key) {
