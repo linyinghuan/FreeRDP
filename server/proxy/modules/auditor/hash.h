@@ -5,7 +5,7 @@
 
 typedef struct _hash_node {
 	uint32_t key;
-	uint32_t used,
+	uint32_t used;
 	void *value;
 } hash_node;
 
