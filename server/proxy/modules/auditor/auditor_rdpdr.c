@@ -153,6 +153,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 			//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
 			//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
 			//add fileindex-path map
+			printf("++++++++++++++ add file id map %d, path:[%s]\n", pNext->path->fileIndex, pNext->path->m_path);
 			hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			pNext = pNext->next;
 		}
@@ -164,7 +165,8 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 
 		//remove old fileindex-path map
 		while(pOldNext) {
-			hash_table_delete(file_map, pNext->path->fileIndex);
+			printf("++++++++++++++ del file id map %d, path:[%s]\n", pOldNext->path->fileIndex);
+			hash_table_delete(file_map, pOldNext->path->fileIndex);
 			pOldNext = pOldNext->next;
 		}
 
@@ -175,6 +177,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 				//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
 				//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
 				//add new fileindex-path map
+				printf("++++++++++++++ add file id map %d, path:[%s]\n", pNext->path->fileIndex, pNext->path->m_path);
 				hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			}
 			pNext = pNext->next;
@@ -348,6 +351,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							break;
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
+
+						printf("cliboard_filter_client_Event  IRP_MJ_DIRECTORY_CONTROL\n" );
+
 						UINT32 DeviceId;
 						UINT32 FileId;
 						UINT32 CompletionId;
@@ -359,9 +365,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 						file_path = hash_table_search(auditor_ctx->file_map, FileId);
 						if(file_path) {
-							printf("++++++++++++++ read file path:[%s]\n", file_path);
+							printf("++++++++++++++ read file id %d,  path:[%s]\n", FileId, file_path);
 						} else {
-							printf("++++++++++++++ read file path:[NULL]\n");
+							printf("++++++++++++++ read file id %d, path:[NULL]\n", FileId);
 						}
 					}
 				}
