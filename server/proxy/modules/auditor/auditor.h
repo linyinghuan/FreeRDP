@@ -5,12 +5,14 @@
 #include "modules_api.h"
 #include "pf_jumpserver.h"
 #include "tlog.h"
+#include "hash.h"
 
 extern UINT32 g_auditor_enable;
 
 typedef struct {
 	char *m_path;
 	int m_isDir;
+	UINT32 fileIndex;
 	UINT64 size;
 } AUDITOR_RDPDR_PATH;
 
@@ -52,6 +54,7 @@ typedef struct {
 	wStream* clip_client_stream;
 
 	/* rdpdr data */
+	hash_table *file_map;
 	wStream* rdpdr_client_stream;
 	wStream* rdpdr_server_stream;
 	UINT32 g_FsInformationClass;

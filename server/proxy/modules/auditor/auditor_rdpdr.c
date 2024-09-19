@@ -137,10 +137,11 @@ AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* l
 	return NULL;
 }
 
-void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
+void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list, hash_table *file_map)
 {
 	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
 	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;
+	AUDITOR_RDPDR_PATH_LIST_NODE* pOldNext = NULL;
 	jms_auditor_point file_pos = {0};
 
 	pOldList =  auditor_rdpdr_find_path_table(table->node, key);
@@ -148,26 +149,38 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 		pNext = list;
 
 		while(pNext) {
-			printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
-			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
+			//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+			//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
+			//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
+			//add fileindex-path map
+			hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			pNext = pNext->next;
 		}
+
+
 	} else {
 		pNext = list;
+		pOldNext = pOldList;
+
+		//remove old fileindex-path map
+		while(pOldNext) {
+			hash_table_delete(file_map, pNext->path->fileIndex);
+			pOldNext = pOldNext->next;
+		}
+
 
 		while(pNext) {
 			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
-				printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
-				tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-				auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
+				//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
+				//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
+				//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
+				//add new fileindex-path map
+				hash_table_insert(file_map, pNext->path->fileIndex, pNext->path->m_path);
 			}
 			pNext = pNext->next;
 		}
 	}
-
 	auditor_rdpdr_add_path_table(table, key, list);
-
 }
 
 void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
@@ -185,6 +198,10 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 		Stream_SetPosition(auditor_ctx->rdpdr_client_stream, 0);
 	}
 	s = auditor_ctx->rdpdr_client_stream;
+	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
+	{
+		return;
+	}	
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 
 
@@ -330,6 +347,22 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						default:
 							break;
 						}
+					} else if (MajorFunction == IRP_MJ_READ) {
+						UINT32 DeviceId;
+						UINT32 FileId;
+						UINT32 CompletionId;
+						char*  file_path = NULL;
+
+						Stream_Read_UINT32(s, DeviceId);
+						Stream_Read_UINT8(s, FileId);
+						Stream_Read_UINT32(s, CompletionId);
+
+						file_path = hash_table_search(auditor_ctx->file_map, FileId);
+						if(file_path) {
+							printf("++++++++++++++ read file path:[%s]\n", file_path);
+						} else {
+							printf("++++++++++++++ read file path:[NULL]\n");
+						}
 					}
 				}
 				break;
@@ -379,6 +412,10 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		Stream_SetPosition(auditor_ctx->rdpdr_server_stream, 0);
 	}
 	s = auditor_ctx->rdpdr_server_stream;
+	if (!Stream_EnsureRemainingCapacity(s, pEvent->data_len))
+	{
+		return;
+	}	
 	Stream_Write(s, pEvent->data, pEvent->data_len);
 
 
@@ -413,31 +450,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	if (IoStatus == STATUS_NO_MORE_FILES) {
 		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
 
-		auditor_rdpdr_update_path_table(pData, &auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node);
-		/*
-		if (g_rdpdrpath.find(g_newPath) != g_rdpdrpath.end()) {
-			printf("---------------------rdpdr_server_Event  g_rdpdrpath find path [%s] -----------------\n", g_newPath.c_str());
-			for(list<FileBriefInfo>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
-				bool bExist = false;
-				for(list<FileBriefInfo>::iterator ita = g_rdpdrpath[g_newPath].begin(); ita != g_rdpdrpath[g_newPath].end(); ita++) {
-					if (*ita == *itb) {
-						bExist = true;
-						break;
-					}
-				}
-				if (!bExist) {
-					printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", itb->m_path.c_str());
-				}
-			}
-
-		}
-		else {
-			for(list<FileBriefInfo>::iterator itb = g_rdpdrpathnew.begin(); itb != g_rdpdrpathnew.end(); itb++) {
-				printf("---------------------rdpdr_server_Event [%s] is upload (new)-----------------\n", itb->m_path.c_str());
-			}
-		}
-		g_rdpdrpath[g_newPath] = g_rdpdrpathnew;
-		*/
+		auditor_rdpdr_update_path_table(pData, &auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node, auditor_ctx->file_map);
 		return;
 	}
 
@@ -543,6 +556,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 					if (FileAttributes | 0x00000010) {
 						path_info->m_isDir = 1;
 					}
+					path_info->fileIndex = FileIndex;
 					auditor_rdpdr_add_path_list(&auditor_ctx->g_rdpdrpath_list, path_info);
 					//free(lpFileNameA);
 				}

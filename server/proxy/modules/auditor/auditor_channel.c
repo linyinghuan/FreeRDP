@@ -19,6 +19,8 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		auditor_ctx = malloc(sizeof(AUDITOR_CTX_DATA));
 		memset(auditor_ctx, 0, sizeof(AUDITOR_CTX_DATA));
 
+		auditor_ctx->file_map = hash_table_init(1024*1024);
+
 		auditor_set_plugin_data(pdata, auditor_ctx);
 	}
 
