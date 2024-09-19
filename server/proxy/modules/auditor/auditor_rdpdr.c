@@ -421,6 +421,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
 
 
+	/*
 	if (auditor_ctx->g_createNewFileNeed) {
 		auditor_ctx->g_createNewFileNeed = false;
 		if (IoStatus == 0) {
@@ -429,6 +430,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);
 		}
 	}
+	*/
 
 	if (!auditor_ctx->g_need)
 		return;
