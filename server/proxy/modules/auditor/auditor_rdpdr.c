@@ -279,9 +279,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								free(path2);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
-								printf("all:%x read:%x write:%x execute:%x", FILE_ALL_ACCESS, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_GENERIC_EXECUTE);
-								printf("----------------- request create file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", auditor_ctx->g_openFilePath, DesiredAccess, CreateDisposition);
-								
+
 								if((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002))) {
 									if(auditor_ctx->g_createNewFilePath)
 										free(auditor_ctx->g_createNewFilePath);
@@ -289,29 +287,39 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									auditor_ctx->g_createNewFileAttributes = FileAttributes;
 									auditor_ctx->g_createNewFileNeed = true;	
 									printf("----------------- request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);								
-								} else {
-									if(auditor_ctx->g_openFilePath)
-										free(auditor_ctx->g_openFilePath);
-									auditor_ctx->g_openFilePath = lpFileNameA;
-									auditor_ctx->g_openFileNeed = true;			
-									printf("----------------- request open file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", auditor_ctx->g_openFilePath, DesiredAccess, CreateDisposition);							
+								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_WRITE) &&
+											 ((DesiredAccess&FILE_WRITE_DATA) || (DesiredAccess&FILE_WRITE_EA))){
+									if(auditor_ctx->g_writeFilePath)
+										free(auditor_ctx->g_writeFilePath);
+									auditor_ctx->g_writeFilePath = lpFileNameA;
+									auditor_ctx->g_writeFileNeed = true;			
+									printf("----------------- request open file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", 
+											auditor_ctx->g_writeFilePath, DesiredAccess, CreateDisposition);							
+								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_READ) &&
+											 ((DesiredAccess&FILE_READ_DATA) || (DesiredAccess&FILE_READ_EA))){
+									if(auditor_ctx->g_readFilePath)
+										free(auditor_ctx->g_readFilePath);
+									auditor_ctx->g_readFilePath = lpFileNameA;
+									auditor_ctx->g_readFileNeed = true;			
+									printf("----------------- request open file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", 
+											auditor_ctx->g_readFilePath, DesiredAccess, CreateDisposition);							
 								}
 
 								//free(lpFileNameA);
 							}
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
-						printf("================= read file %d %s\n", auditor_ctx->g_openFileNeed, auditor_ctx->g_openFilePath);
-						if(auditor_ctx->g_openFileNeed == true) {
-							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_openFilePath);
-							auditor_ctx->g_openFileNeed = false;
+						printf("================= read file %d %s\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath);
+						if(auditor_ctx->g_readFileNeed == true) {
+							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
+							auditor_ctx->g_readFileNeed = false;
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
-						printf("================= write file %d %s\n", auditor_ctx->g_openFileNeed, auditor_ctx->g_openFilePath);
-						if(auditor_ctx->g_openFileNeed == true) {
-							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_openFilePath);
-							auditor_ctx->g_openFileNeed = false;
+						printf("================= write file %d %s\n", auditor_ctx->g_writeFileNeed, auditor_ctx->g_writeFilePath);
+						if(auditor_ctx->g_writeFileNeed == true) {
+							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
+							auditor_ctx->g_writeFileNeed = false;
 						}
 					}
 				}
