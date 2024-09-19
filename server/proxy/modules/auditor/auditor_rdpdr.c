@@ -292,7 +292,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(auditor_ctx->g_openFilePath);
 									auditor_ctx->g_openFilePath = lpFileNameA;
 									auditor_ctx->g_openFileNeed = true;			
-									printf("----------------- request open file path:[%s]\n", auditor_ctx->g_createNewFilePath);							
+									printf("----------------- request open file path:[%s]\n", auditor_ctx->g_openFilePath);							
 								}
 
 								//free(lpFileNameA);
