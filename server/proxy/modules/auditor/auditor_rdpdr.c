@@ -229,7 +229,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 					UINT32 MajorFunction;
 					UINT32 MinorFunction;
 
-					printf("cliboard_filter_client_Event  PAKID_CORE_DEVICE_IOREQUEST\n" );
+					//printf("cliboard_filter_client_Event  PAKID_CORE_DEVICE_IOREQUEST\n" );
 
 					if (Stream_GetRemainingLength(s) < 20)
 						return;
@@ -239,7 +239,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 					Stream_Read_UINT32(s, CompletionId);  /* CompletionId (4 bytes) */
 					Stream_Read_UINT32(s, MajorFunction); /* MajorFunction (4 bytes) */
 					Stream_Read_UINT32(s, MinorFunction); /* MinorFunction (4 bytes) */
-					printf("cliboard_filter_client_Event MajorFunction: 0x%x -----------------\n", MajorFunction);
+					//printf("cliboard_filter_client_Event MajorFunction: 0x%x -----------------\n", MajorFunction);
 
 					if (MajorFunction == IRP_MJ_CREATE) {
 						//UINT32 FileId;
@@ -279,6 +279,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								free(path2);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
+								printf("++++++++++++++ create file path:[%s]\n", lpFileNameA);
 								if(auditor_ctx->g_createNewFilePath)
 									free(auditor_ctx->g_createNewFilePath);
 								auditor_ctx->g_createNewFilePath = lpFileNameA;
