@@ -114,7 +114,7 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	event->data_type = AUDITOR_EVENT_DATA_TYPE_TEXT;
 	event->event_data = event_data;
 
-	auditor_event_proc(event);
+	//auditor_event_proc(event);
 }
 
 void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
@@ -174,7 +174,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	event->data_type = AUDITOR_EVENT_DATA_TYPE_FILE;
 	event->event_data = event_data;
 
-	auditor_event_proc(event);
+	//auditor_event_proc(event);
 }
 
 void auditor_mouse_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos)
@@ -209,5 +209,5 @@ void auditor_mouse_event_produce(jms_auditor_event_type event_type, char *sid, j
 	event->data_type = AUDITOR_EVENT_DATA_TYPE_MOUSE;
 	event->event_data = event_data;
 
-	auditor_event_proc(event);
+	//auditor_event_proc(event);
 }

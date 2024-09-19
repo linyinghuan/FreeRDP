@@ -13,6 +13,12 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		return TRUE;
 	}
 
+	if(NULL == pdata->ps->sid)
+		pdata->ps->sid = "test";
+
+	if(NULL == pdata->ps->uuid)
+		pdata->ps->uuid = "test-uuid";
+
 	printf("session %s server channel init\n", pdata->session_id);
 
 	if(NULL == auditor_get_plugin_data(pdata)) {
