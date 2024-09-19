@@ -283,6 +283,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									free(auditor_ctx->g_createNewFilePath);
 								auditor_ctx->g_createNewFilePath = lpFileNameA;
 								auditor_ctx->g_createNewFileAttributes = FileAttributes;
+								auditor_ctx->g_createNewFileNeed = true;
 								//free(lpFileNameA);
 							}
 						}
@@ -314,28 +315,6 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	UINT32 DeviceId;
 	UINT32 CompletionId;
 	UINT32 IoStatus;
-	UINT32 totalLength;
-	UINT32 Length;
-	UINT32 NextEntryOffset;;
-	UINT32 FileIndex;
-	UINT32 CreationTime;
-	UINT32 CreationTime2;
-	UINT32 LastAccessTime;
-	UINT32 LastAccessTime2;
-	UINT32 LastWriteTime;
-	UINT32 LastWriteTime2;
-	UINT32 ChangeTime;
-	UINT32 ChangeTime2;
-	UINT32 EndOfFile;
-	UINT32 EndOfFile2;
-	UINT32 AllocationSize;
-	UINT32 AllocationSize2;
-	UINT32 FileAttributes;
-	WCHAR* path;
-	UINT32 EaSize;
-	UINT8 ShortNameLength;
-	LPSTR lpFileNameA;
-	jms_auditor_point file_pos = {0}; 
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST || !auditor_ctx->rdpdr_server_stream)
 	{
@@ -366,7 +345,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 	Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
-	printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
+	//printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
 
 	return;
 }
