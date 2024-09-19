@@ -287,7 +287,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									auditor_ctx->g_createNewFileAttributes = FileAttributes;
 									auditor_ctx->g_createNewFileNeed = true;	
 									printf("----------------- request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);								
-								} else {
+								} else if(DesiredAccess == FILE_GENERIC_WRITE){
 									if(auditor_ctx->g_openFilePath)
 										free(auditor_ctx->g_openFilePath);
 									auditor_ctx->g_openFilePath = lpFileNameA;
