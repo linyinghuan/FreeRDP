@@ -280,7 +280,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 								
-								if(CreateDisposition == 1 || CreateDisposition == 2) {
+								if((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002))) {
 									printf("++++++++++++++ request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 									if(auditor_ctx->g_createNewFilePath)
 										free(auditor_ctx->g_createNewFilePath);
