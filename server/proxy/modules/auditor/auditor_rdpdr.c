@@ -279,6 +279,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								free(path2);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
+								printf("all:%x read:%x write:%x execute:%x", FILE_ALL_ACCESS, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_GENERIC_EXECUTE);
+								printf("----------------- request create file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", auditor_ctx->g_openFilePath, DesiredAccess, CreateDisposition);
 								
 								if((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002))) {
 									if(auditor_ctx->g_createNewFilePath)
@@ -287,7 +289,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									auditor_ctx->g_createNewFileAttributes = FileAttributes;
 									auditor_ctx->g_createNewFileNeed = true;	
 									printf("----------------- request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);								
-								} else if(DesiredAccess == FILE_GENERIC_WRITE){
+								} else {
 									if(auditor_ctx->g_openFilePath)
 										free(auditor_ctx->g_openFilePath);
 									auditor_ctx->g_openFilePath = lpFileNameA;
