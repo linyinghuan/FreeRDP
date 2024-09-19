@@ -165,7 +165,7 @@ void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_
 
 		//remove old fileindex-path map
 		while(pOldNext) {
-			printf("++++++++++++++ del file id map %d, path:[%s]\n", pOldNext->path->fileIndex);
+			printf("++++++++++++++ del file id map %d\n", pOldNext->path->fileIndex);
 			hash_table_delete(file_map, pOldNext->path->fileIndex);
 			pOldNext = pOldNext->next;
 		}
