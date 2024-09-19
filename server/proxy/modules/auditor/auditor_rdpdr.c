@@ -277,77 +277,25 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 									return;
 								free(path2);
-								printf("=========IRP_MJ_CREATE path:[%s]\n", lpFileNameA);
-								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
+								if(auditor_ctx->g_createNewFilePath)
+									free(auditor_ctx->g_createNewFilePath);
 								auditor_ctx->g_createNewFilePath = lpFileNameA;
-								auditor_ctx->g_createNewFileNeed = true;
 								auditor_ctx->g_createNewFileAttributes = FileAttributes;
 								//free(lpFileNameA);
 							}
-						}
-					}
-					else if (MajorFunction == IRP_MJ_DIRECTORY_CONTROL) {
-						printf("cliboard_filter_client_Event  IRP_MJ_DIRECTORY_CONTROL\n" );
-						switch (MinorFunction)
-						{
-							case IRP_MN_QUERY_DIRECTORY:
-							{
-								auditor_ctx->g_need = true;
-								const WCHAR* path;
-								//DRIVE_FILE* file;
-								BYTE InitialQuery;
-								UINT32 PathLength;
-								UINT32 FsInformationClass;
-
-								if (Stream_GetRemainingLength(s) < 32)
-									return;
-
-								Stream_Read_UINT32(s, FsInformationClass);
-								Stream_Read_UINT8(s, InitialQuery);
-								Stream_Read_UINT32(s, PathLength);
-								Stream_Seek(s, 23); /* Padding */
-								path = (WCHAR*)Stream_Pointer(s);
-								auditor_ctx->g_FsInformationClass = FsInformationClass;
-								{
-									if (PathLength < s->length) {
-										WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
-										memcpy(path2, path, PathLength);
-										LPSTR lpFileNameA;
-										if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-											return;
-										free(path2);
-										printf("=========IRP_MN_QUERY_DIRECTORY path:[%s]\n", lpFileNameA);
-										if (strlen(lpFileNameA) > 0) {
-											auditor_ctx->g_newPath = lpFileNameA;
-											auditor_ctx->g_rdpdrpath_list.node = NULL;
-										}
-										//free(lpFileNameA);
-									}
-								}
-							}
-							break;
-
-						case IRP_MN_NOTIFY_CHANGE_DIRECTORY: /* TODO */
-							break;
-						default:
-							break;
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
 						if(auditor_ctx->g_createNewFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 							auditor_ctx->g_createNewFileNeed = false;
-							free(auditor_ctx->g_createNewFilePath);
-							auditor_ctx->g_createNewFilePath = NULL;
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
 						if(auditor_ctx->g_createNewFileNeed == true) {
 							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 							auditor_ctx->g_createNewFileNeed = false;
-							free(auditor_ctx->g_createNewFilePath);
-							auditor_ctx->g_createNewFilePath = NULL;
 						}
 					}
 				}
@@ -420,149 +368,5 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
 	printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
 
-
-	/*
-	if (auditor_ctx->g_createNewFileNeed) {
-		auditor_ctx->g_createNewFileNeed = false;
-		if (IoStatus == 0) {
-			printf("---------------------rdpdr_server_Event  file [%s] is created-----------------\n", auditor_ctx->g_createNewFilePath);
-			tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_createNewFilePath);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);
-		}
-	}
-	*/
-
-	if (!auditor_ctx->g_need)
-		return;
-
-	if (IoStatus == STATUS_NO_MORE_FILES) {
-		printf("---------------------rdpdr_server_Event  STATUS_NO_MORE_FILES -----------------\n");
-
-		auditor_rdpdr_update_path_table(pData, &auditor_ctx->g_rdpdrpath, auditor_ctx->g_newPath, auditor_ctx->g_rdpdrpath_list.node, auditor_ctx->file_map);
-		return;
-	}
-
-
-	auditor_ctx->g_need = false;
-	switch (auditor_ctx->g_FsInformationClass)
-	{
-		case FileDirectoryInformation:
-			Stream_Read_UINT32(s, totalLength); /* Length */
-			Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
-			Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
-			Stream_Read_UINT32(s,CreationTime); /* CreationTime */
-			Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
-			Stream_Read_UINT32(s, LastAccessTime); /* LastAccessTime */
-			Stream_Read_UINT32(s, LastAccessTime2); /* LastAccessTime */
-			Stream_Read_UINT32(s,LastWriteTime); /* LastWriteTime */
-			Stream_Read_UINT32(s,LastWriteTime2); /* LastWriteTime */
-			Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
-			Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
-			Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
-			Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
-			Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
-			Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
-			Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
-			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
-			path = (WCHAR*)Stream_Pointer(s);
-			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return;
-
-			printf("=========path:[%s]\n", lpFileNameA);
-			break;
-
-		case FileFullDirectoryInformation:
-			Stream_Read_UINT32(s, totalLength); /* Length */
-			Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
-			Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
-			Stream_Read_UINT32(s,CreationTime); /* CreationTime */
-			Stream_Read_UINT32(s,CreationTime2); /* CreationTime */
-			Stream_Read_UINT32(s, LastAccessTime); /* LastAccessTime */
-			Stream_Read_UINT32(s, LastAccessTime2); /* LastAccessTime */
-			Stream_Read_UINT32(s,LastWriteTime); /* LastWriteTime */
-			Stream_Read_UINT32(s,LastWriteTime2); /* LastWriteTime */
-			Stream_Read_UINT32(s,ChangeTime); /* ChangeTime */
-			Stream_Read_UINT32(s,ChangeTime2); /* ChangeTime */
-			Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
-			Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
-			Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
-			Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
-			Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
-			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
-			Stream_Read_UINT32(s, EaSize);                                /* EaSize */
-
-			path = (WCHAR*)Stream_Pointer(s);
-			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return;
-			printf("=========path:[%s]\n", lpFileNameA);
-			break;
-
-		case FileBothDirectoryInformation:
-			Stream_Read_UINT32(s, totalLength); /* Length */
-			if (totalLength == 0) {
-				printf("=========total length is 0, maybe MJ_Close\n");
-				return;
-			}
-			Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
-			Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
-			Stream_Read_UINT32(s, CreationTime); /* CreationTime */
-			Stream_Read_UINT32(s, CreationTime2); /* CreationTime */
-			Stream_Read_UINT32(s, LastAccessTime); /* LastAccessTime */
-			Stream_Read_UINT32(s, LastAccessTime2); /* LastAccessTime */
-			Stream_Read_UINT32(s, LastWriteTime); /* LastWriteTime */
-			Stream_Read_UINT32(s, LastWriteTime2); /* LastWriteTime */
-			Stream_Read_UINT32(s, ChangeTime); /* ChangeTime */
-			Stream_Read_UINT32(s, ChangeTime2); /* ChangeTime */
-			Stream_Read_UINT32(s, EndOfFile);           /* EndOfFile */
-			Stream_Read_UINT32(s, EndOfFile2);          /* EndOfFile */
-			Stream_Read_UINT32(s, AllocationSize);     /* AllocationSize */
-			Stream_Read_UINT32(s, AllocationSize2);    /* AllocationSize */
-			Stream_Read_UINT32(s, FileAttributes); /* FileAttributes */
-			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
-			Stream_Read_UINT32(s, EaSize);                                /* EaSize */
-			Stream_Read_UINT8(s, ShortNameLength);
-			Stream_Seek(s, 24);
-			path = (WCHAR*)Stream_Pointer(s);
-			{
-				AUDITOR_RDPDR_PATH *path_info = NULL;
-
-				if (Length < s->length) {
-					WCHAR* path2 = (WCHAR*)calloc(Length + 1, sizeof(WCHAR));
-					memcpy(path2, path, Length);
-
-					if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-						return;
-					free(path2);
-					printf("=========FileBothDirectoryInformation path:[%s]\n", lpFileNameA);
-					printf("=========FileBothDirectoryInformation FileAttributes:[0x%x]\n", FileAttributes);
-
-					path_info = malloc(sizeof(AUDITOR_RDPDR_PATH));
-					memset(path_info, 0, sizeof(AUDITOR_RDPDR_PATH));
-					path_info->m_path = lpFileNameA;
-					path_info->size = AllocationSize2;
-					path_info->size = (path_info->size << 32) | AllocationSize;
-					if (FileAttributes | 0x00000010) {
-						path_info->m_isDir = 1;
-					}
-					path_info->fileIndex = FileIndex;
-					auditor_rdpdr_add_path_list(&auditor_ctx->g_rdpdrpath_list, path_info);
-					//free(lpFileNameA);
-				}
-			}
-			break;
-
-		case FileNamesInformation:
-			Stream_Read_UINT32(s, totalLength); /* Length */
-			Stream_Read_UINT32(s, NextEntryOffset);                     /* NextEntryOffset */
-			Stream_Read_UINT32(s, FileIndex);                     /* FileIndex */
-			Stream_Read_UINT32(s, Length);                   /* FileNameLength */
-			path = (WCHAR*)Stream_Pointer(s);
-			if (ConvertFromUnicode(CP_UTF8, 0, path, -1, &lpFileNameA, 0, NULL, NULL) < 1)
-				return;
-			printf("=========filename:[%s]\n", lpFileNameA);
-			break;
-
-		default:
-			break;
-	}
+	return;
 }
