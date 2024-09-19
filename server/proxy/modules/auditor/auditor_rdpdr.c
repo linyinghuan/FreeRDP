@@ -295,11 +295,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								printf("=========IRP_MJ_CREATE CreateDisposition:[0x%x] [0x%x] [0x%x] [0x%x]\n", CreateDisposition, CreateOptions, FileAttributes, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
-								if ((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002) ) ) {
 									auditor_ctx->g_createNewFilePath = lpFileNameA;
 									auditor_ctx->g_createNewFileNeed = true;
 									auditor_ctx->g_createNewFileAttributes = FileAttributes;
-								}
 								//free(lpFileNameA);
 							}
 						}
