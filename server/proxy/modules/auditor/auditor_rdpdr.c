@@ -279,25 +279,37 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								free(path2);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
-								printf("++++++++++++++ create file path:[%s]\n", lpFileNameA);
-								if(auditor_ctx->g_createNewFilePath)
-									free(auditor_ctx->g_createNewFilePath);
-								auditor_ctx->g_createNewFilePath = lpFileNameA;
-								auditor_ctx->g_createNewFileAttributes = FileAttributes;
-								auditor_ctx->g_createNewFileNeed = true;
+								
+								if(CreateOptions == 1 || CreateOptions == 2) {
+									printf("++++++++++++++ request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+									if(auditor_ctx->g_createNewFilePath)
+										free(auditor_ctx->g_createNewFilePath);
+									auditor_ctx->g_createNewFilePath = lpFileNameA;
+									auditor_ctx->g_createNewFileAttributes = FileAttributes;
+									auditor_ctx->g_createNewFileNeed = true;									
+								} else {
+									printf("++++++++++++++ request open file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+									if(auditor_ctx->g_openFilePath)
+										free(auditor_ctx->g_openFilePath);
+									auditor_ctx->g_openFilePath = lpFileNameA;
+									auditor_ctx->g_openFileNeed = true;										
+								}
+
 								//free(lpFileNameA);
 							}
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
-						if(auditor_ctx->g_createNewFileNeed == true) {
-							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_createNewFilePath);
-							auditor_ctx->g_createNewFileNeed = false;
+						printf("================= read file %d %s\n", auditor_ctx->g_openFileNeed, auditor_ctx->g_openFilePath);
+						if(auditor_ctx->g_openFileNeed == true) {
+							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_openFilePath);
+							auditor_ctx->g_openFileNeed = false;
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
-						if(auditor_ctx->g_createNewFileNeed == true) {
-							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_createNewFilePath);
-							auditor_ctx->g_createNewFileNeed = false;
+						printf("================= write file %d %s\n", auditor_ctx->g_openFileNeed, auditor_ctx->g_openFilePath);
+						if(auditor_ctx->g_openFileNeed == true) {
+							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_openFilePath);
+							auditor_ctx->g_openFileNeed = false;
 						}
 					}
 				}
@@ -347,6 +359,13 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
 	//printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
+
+	if (auditor_ctx->g_createNewFileNeed) {
+		auditor_ctx->g_createNewFileNeed = false;
+		if (IoStatus == 0) {
+			printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+		}
+	}
 
 	return;
 }

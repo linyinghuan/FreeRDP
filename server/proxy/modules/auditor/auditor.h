@@ -61,6 +61,8 @@ typedef struct {
 	bool g_need;
 	bool g_createNewFileNeed;
 	char *g_createNewFilePath;
+	bool g_openFileNeed;
+	char *g_openFilePath;
 	UINT32 g_createNewFileAttributes;
 	char *g_newPath;
 	AUDITOR_RDPDR_PATH_TABLE_HEAD g_rdpdrpath;
