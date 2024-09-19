@@ -321,6 +321,16 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
 							auditor_ctx->g_writeFileNeed = false;
 						}
+					} else if (MajorFunction == IRP_MJ_SET_INFORMATION) {
+						UINT32 FsInformationClass;
+						UINT32 Length;
+
+						Stream_Read_UINT32(s, FsInformationClass);
+						Stream_Read_UINT32(s, Length);
+
+						if(FsInformationClass == FileRenameInformation)
+							printf("++++++++++++++ rename file \n");
+
 					}
 				}
 				break;
