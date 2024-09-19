@@ -351,24 +351,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							break;
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
-
-						printf("cliboard_filter_client_Event  IRP_MJ_DIRECTORY_CONTROL\n" );
-
-						UINT32 DeviceId;
-						UINT32 FileId;
-						UINT32 CompletionId;
-						char*  file_path = NULL;
-
-						Stream_Read_UINT32(s, DeviceId);
-						Stream_Read_UINT8(s, FileId);
-						Stream_Read_UINT32(s, CompletionId);
-
-						file_path = hash_table_search(auditor_ctx->file_map, FileId);
-						if(file_path) {
-							printf("++++++++++++++ read file id %d,  path:[%s]\n", FileId, file_path);
-						} else {
-							printf("++++++++++++++ read file id %d, path:[NULL]\n", FileId);
-						}
+						printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+					} else if (MajorFunction == IRP_MJ_WRITE) {
+						printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 					}
 				}
 				break;
