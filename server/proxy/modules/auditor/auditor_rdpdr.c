@@ -300,13 +300,31 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(auditor_ctx->g_readFilePath);
 									auditor_ctx->g_readFilePath = lpFileNameA;
 									auditor_ctx->g_readFileNeed = true;
+									auditor_ctx->g_readFileMaxCompId = 32;
+									if(auditor_ctx->g_readFileOffset)
+										free(auditor_ctx->g_readFileOffset);
+									auditor_ctx->g_readFileOffset = malloc(auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
+									memset(auditor_ctx->g_readFileOffset, 0, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
 								}
 
 								//free(lpFileNameA);
 							}
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
+						UINT32 length;
+						UINT32 offset;
+
+						Stream_Read_UINT32(s, length);
+						Stream_Read_UINT32(s, offset);
 						printf("================= read file %d %s %d\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId);
+						if(CompletionId < auditor_ctx->g_readFileMaxCompId) {
+							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
+						} else {
+							auditor_ctx->g_readFileMaxCompId += 32;
+							auditor_ctx->g_readFileOffset = realloc(auditor_ctx->g_readFileOffset, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
+							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
+						}
+
 						auditor_ctx->g_readFileCompId = CompletionId;
 						if(auditor_ctx->g_readFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
@@ -407,15 +425,19 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		}
 	}
 
-	if(auditor_ctx->g_readFileDatasNeed == true && CompletionId == auditor_ctx->g_readFileCompId) {
+	if(auditor_ctx->g_readFileDatasNeed == true) {
 		UINT32 length;
 		char file_path[1024] = {0};
+		FILE* fp = NULL;
 
 		Stream_Read_UINT32(s, length);
+
+
 		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
 		printf("++++++++++++++ read file data:[%s] len[%d] status[%d]\n", file_path, length, IoStatus);
-		FILE* fp=fopen(file_path,"a");
+		fp = fopen(file_path,"a");
 
+		fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
 		if(fp) {
 			fwrite(s->pointer, length, 1, fp);
 			fclose(fp);				

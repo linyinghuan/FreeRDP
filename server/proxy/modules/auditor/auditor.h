@@ -66,7 +66,8 @@ typedef struct {
 	bool g_readFileNeed;
 	char *g_readFilePath;
 	bool g_readFileDatasNeed;
-	UINT32 g_readFileCompId;	
+	UINT32 g_readFileMaxCompId;
+	UINT64 *g_readFileOffset;	
 	UINT32 g_createNewFileAttributes;
 	char *g_newPath;
 	AUDITOR_RDPDR_PATH_TABLE_HEAD g_rdpdrpath;
