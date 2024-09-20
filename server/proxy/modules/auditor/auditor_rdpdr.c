@@ -271,7 +271,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 						path = (const WCHAR*)Stream_Pointer(s);
 						{
-							if (PathLength < s->length) {
+							if (PathLength > 0 && PathLength < s->length) {
 								WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
 								memcpy(path2, path+1, PathLength-1);
 								LPSTR lpFileNameA;
