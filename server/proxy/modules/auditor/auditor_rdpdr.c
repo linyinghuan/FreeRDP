@@ -300,7 +300,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(auditor_ctx->g_readFilePath);
 									auditor_ctx->g_readFilePath = lpFileNameA;
 									auditor_ctx->g_readFileNeed = true;
-									auditor_ctx->g_readFileCompId = CompletionId;
 								}
 
 								//free(lpFileNameA);
@@ -308,6 +307,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
 						printf("================= read file %d %s\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath);
+						auditor_ctx->g_readFileCompId = CompletionId;
 						if(auditor_ctx->g_readFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
 							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
