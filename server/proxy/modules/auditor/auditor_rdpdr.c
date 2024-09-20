@@ -322,15 +322,34 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							auditor_ctx->g_writeFileNeed = false;
 						}
 					} else if (MajorFunction == IRP_MJ_SET_INFORMATION) {
-						UINT32 FsInformationClass;
-						UINT32 Length;
+						if(FsInformationClass == FileRenameInformation) {
+							UINT32 FsInformationClass;
+							UINT32 Length;
+							UINT8 ReplaceIfExists;
+							UINT8 RootDirectory;
+							UINT32 FileNameLength;
+							const WCHAR* path;
 
-						Stream_Read_UINT32(s, FsInformationClass);
-						Stream_Read_UINT32(s, Length);
+							Stream_Read_UINT32(s, FsInformationClass);
+							Stream_Read_UINT32(s, Length);
+							Stream_Seek(s, 24);
+							Stream_Read_UINT8(s, ReplaceIfExists);
+							Stream_Read_UINT8(s, RootDirectory);
+							Stream_Read_UINT32(s, FileNameLength);					
 
-						if(FsInformationClass == FileRenameInformation)
-							printf("++++++++++++++ rename file \n");
+							path = (const WCHAR*)Stream_Pointer(s);
+							if (FileNameLength < s->length) {
+								WCHAR* path2 = (WCHAR*)calloc(FileNameLength + 1, sizeof(WCHAR));
+								memcpy(path2, path, FileNameLength);
+								LPSTR lpFileNameA;
+								if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
+									return;
+								free(path2);
 
+								printf("++++++++++++++ rename file new name %s\n", lpFileNameA);							
+							}	
+						}
+				
 					}
 				}
 				break;
