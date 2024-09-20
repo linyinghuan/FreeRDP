@@ -325,7 +325,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
 						}
 
-						auditor_ctx->g_readFileCompId = CompletionId;
 						if(auditor_ctx->g_readFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
 							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
