@@ -273,7 +273,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						{
 							if (PathLength < s->length) {
 								WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
-								memcpy(path2, path, PathLength);
+								memcpy(path2, path+1, PathLength-1);
 								LPSTR lpFileNameA;
 								if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 									return;
@@ -313,6 +313,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
 							auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);							
 							auditor_ctx->g_readFileNeed = false;
+							auditor_ctx->g_readFileDatasNeed = true;
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
@@ -406,7 +407,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		}
 	}
 
-	if(CompletionId == auditor_ctx->g_readFileCompId) {
+	if(auditor_ctx->g_readFileDatasNeed == true && CompletionId == auditor_ctx->g_readFileCompId) {
 		UINT32 length;
 		char file_path[1024] = {0};
 
@@ -418,7 +419,8 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		if(fp) {
 			fwrite(s->pointer, length, 1, fp);
 			fclose(fp);				
-		}		
+		}
+		auditor_ctx->g_readFileDatasNeed = false;
 	}
 
 	return;

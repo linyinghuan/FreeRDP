@@ -65,6 +65,7 @@ typedef struct {
 	char *g_writeFilePath;
 	bool g_readFileNeed;
 	char *g_readFilePath;
+	bool g_readFileDatasNeed;
 	UINT32 g_readFileCompId;	
 	UINT32 g_createNewFileAttributes;
 	char *g_newPath;
