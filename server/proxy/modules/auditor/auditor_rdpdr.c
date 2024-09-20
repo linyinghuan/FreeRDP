@@ -434,7 +434,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
 		printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
-		fp = fopen(file_path,"w+");
+		fp = fopen(file_path,"a");
 
 		fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
 		if(fp) {
