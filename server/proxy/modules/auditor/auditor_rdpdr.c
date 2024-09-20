@@ -53,125 +53,6 @@ __attribute__((constructor)) static int auditor_rdpdr_init()
 	return 0;
 }
 
-UINT32 auditor_rdpdr_add_path_table(AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char *key, AUDITOR_RDPDR_PATH_LIST_NODE* list)
-{
-	AUDITOR_RDPDR_PATH_TABLE_NODE* node = NULL;
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pTmp = NULL;
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table->node;
-
-	while(pNext) {
-		pTmp = pNext;
-		if(0 ==strcmp(pNext->path_key, key)) {
-			//free old list
-			pNext->path_list = list;
-			return 0;
-		}
-
-		pNext = pNext->next;
-	}
-
-	node = malloc(sizeof(AUDITOR_RDPDR_PATH_TABLE_NODE));
-	memset(node, 0, sizeof(AUDITOR_RDPDR_PATH_TABLE_NODE));
-	node->path_key = key;
-	node->path_list = list;
-
-	if(pTmp)
-		pTmp->next = node;
-	else
-		table->node = node;
-
-	return 1;
-}
-
-AUDITOR_RDPDR_PATH_LIST_NODE* auditor_rdpdr_find_path_table(AUDITOR_RDPDR_PATH_TABLE_NODE* table, char* key)
-{
-	AUDITOR_RDPDR_PATH_TABLE_NODE* pNext = table;
-
-	while(pNext) {
-		if(0 ==strcmp(pNext->path_key, key))
-			return pNext->path_list;
-
-		pNext = pNext->next;
-	}
-
-	return NULL;
-}
-
-UINT32 auditor_rdpdr_add_path_list(AUDITOR_RDPDR_PATH_LIST_HEAD* list, AUDITOR_RDPDR_PATH *path_info)
-{
-	AUDITOR_RDPDR_PATH_LIST_NODE* node = NULL;
-	AUDITOR_RDPDR_PATH_LIST_NODE* pTmp = NULL;
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list->node;
-
-	while(pNext) {
-		pTmp = pNext;
-		if(0 ==strcmp(pNext->path->m_path, path_info->m_path))
-			return 0;
-
-		pNext = pNext->next;
-	}
-
-	node = malloc(sizeof(AUDITOR_RDPDR_PATH_LIST_NODE));
-	memset(node, 0, sizeof(AUDITOR_RDPDR_PATH_LIST_NODE));
-	node->path = path_info;
-
-	if(pTmp)
-		pTmp->next = node;
-	else
-		list->node = node;
-
-	return 1;
-}
-
-AUDITOR_RDPDR_PATH *auditor_rdpdr_find_path_list(AUDITOR_RDPDR_PATH_LIST_NODE* list, char *path)
-{
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = list;
-
-	while(pNext) {
-		if(0 ==strcmp(pNext->path->m_path, path))
-			return pNext->path;
-
-		pNext = pNext->next;
-	}
-
-	return NULL;
-}
-
-void auditor_rdpdr_update_path_table(proxyData* pData, AUDITOR_RDPDR_PATH_TABLE_HEAD* table, char* key, AUDITOR_RDPDR_PATH_LIST_NODE* list, hash_table *file_map)
-{
-	AUDITOR_RDPDR_PATH_LIST_NODE* pOldList = NULL;
-	AUDITOR_RDPDR_PATH_LIST_NODE* pNext = NULL;
-	AUDITOR_RDPDR_PATH_LIST_NODE* pOldNext = NULL;
-	jms_auditor_point file_pos = {0};
-
-	pOldList =  auditor_rdpdr_find_path_table(table->node, key);
-	if(NULL == pOldList) {
-		pNext = list;
-
-		while(pNext) {
-			//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
-			//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-			//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
-			pNext = pNext->next;
-		}
-
-
-	} else {
-		pNext = list;
-		pOldNext = pOldList;
-
-		while(pNext) {
-			if(NULL == auditor_rdpdr_find_path_list(pOldList, pNext->path->m_path)){
-				//printf("---------------------rdpdr_server_Event [%s] is upload-----------------\n", pNext->path->m_path);
-				//tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", pNext->path->m_path);
-				//auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, pNext->path->m_path, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);
-			}
-			pNext = pNext->next;
-		}
-	}
-	auditor_rdpdr_add_path_table(table, key, list);
-}
-
 void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventInfo* pEvent, AUDITOR_CTX_DATA *auditor_ctx)
 {
 	wStream* s = NULL;
@@ -334,8 +215,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							remove(file_path);
 
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
-							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
-							auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);							
+							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_readFilePath);
+							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);							
 							auditor_ctx->g_readFileNeed = false;
 							auditor_ctx->g_readFileDatasNeed = true;
 						}
@@ -345,6 +226,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						if(auditor_ctx->g_writeFileNeed == true) {
 							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
 							auditor_ctx->g_writeFileNeed = false;
+
+							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_writeFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);	
 						}
 					} else if (MajorFunction == IRP_MJ_SET_INFORMATION) {
 						UINT32 FsInformationClass;
@@ -371,7 +254,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									return;
 								free(path2);
 
-								printf("++++++++++++++ rename file new name %s\n", lpFileNameA);							
+								printf("++++++++++++++ rename file new name %s\n", lpFileNameA);
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, lpFileNameA, 0, file_pos, pData->config->AuditorDumpFilePath);						
 							}	
 						}
 				
@@ -392,6 +276,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	UINT32 DeviceId;
 	UINT32 CompletionId;
 	UINT32 IoStatus;
+	jms_auditor_point file_pos = {0};
 
 	if (pEvent->flags & CHANNEL_FLAG_FIRST || !auditor_ctx->rdpdr_server_stream)
 	{
@@ -428,6 +313,8 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		auditor_ctx->g_createNewFileNeed = false;
 		if (IoStatus == 0) {
 			printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
+
+			auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);
 		}
 	}
 

@@ -33,8 +33,6 @@ add_library(${PLUGIN_NAME} MODULE
 	auditor_rdpdr.c
 	tlog.c
 	tlog.h
-	hash.c
-	hash.h
 )
 
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
