@@ -328,6 +328,11 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						}
 
 						if(auditor_ctx->g_readFileNeed == true) {
+							char file_path[1024] = {0};
+							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
+
+							remove(file_path);
+
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
 							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
 							auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);							
