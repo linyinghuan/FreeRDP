@@ -292,17 +292,14 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									if(auditor_ctx->g_writeFilePath)
 										free(auditor_ctx->g_writeFilePath);
 									auditor_ctx->g_writeFilePath = lpFileNameA;
-									auditor_ctx->g_writeFileNeed = true;			
-									printf("----------------- request open file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", 
-											auditor_ctx->g_writeFilePath, DesiredAccess, CreateDisposition);							
+									auditor_ctx->g_writeFileNeed = true;
 								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_READ) &&
 											 ((DesiredAccess&FILE_READ_DATA) || (DesiredAccess&FILE_READ_EA))){
 									if(auditor_ctx->g_readFilePath)
 										free(auditor_ctx->g_readFilePath);
 									auditor_ctx->g_readFilePath = lpFileNameA;
-									auditor_ctx->g_readFileNeed = true;			
-									printf("----------------- request open file path:[%s] DesiredAccess%lx CreateDisposition:%lx \n", 
-											auditor_ctx->g_readFilePath, DesiredAccess, CreateDisposition);							
+									auditor_ctx->g_readFileNeed = true;
+									auditor_ctx->g_readFileCompId = CompletionId;
 								}
 
 								//free(lpFileNameA);
@@ -312,6 +309,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						printf("================= read file %d %s\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath);
 						if(auditor_ctx->g_readFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
+							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] upload file: %s\n", auditor_ctx->g_readFilePath);
+							auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, pNext->path->size, file_pos, pData->config->AuditorDumpFilePath);							
 							auditor_ctx->g_readFileNeed = false;
 						}
 						
@@ -404,6 +403,21 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		if (IoStatus == 0) {
 			printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 		}
+	}
+
+	if(CompletionId == auditor_ctx->g_readFileCompId) {
+		UINT32 length;
+		char file_path[1024] = {0};
+
+		Stream_Read_UINT32(s, length);
+		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
+		printf("++++++++++++++ read file data:[%s] len[%d]\n", file_path, length);
+		FILE* fp=fopen(file_path,"a");
+
+		if(fp) {
+			fwrite(s->pointer, length, 1, fp);
+			fclose(fp);				
+		}		
 	}
 
 	return;
