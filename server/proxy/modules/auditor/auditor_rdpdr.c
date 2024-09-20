@@ -413,14 +413,14 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 		Stream_Read_UINT32(s, length);
 		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
-		printf("++++++++++++++ read file data:[%s] len[%d]\n", file_path, length);
+		printf("++++++++++++++ read file data:[%s] len[%d] status[%d]\n", file_path, length, IoStatus);
 		FILE* fp=fopen(file_path,"a");
 
 		if(fp) {
 			fwrite(s->pointer, length, 1, fp);
 			fclose(fp);				
 		}
-		auditor_ctx->g_readFileDatasNeed = false;
+		//auditor_ctx->g_readFileDatasNeed = false;
 	}
 
 	return;
