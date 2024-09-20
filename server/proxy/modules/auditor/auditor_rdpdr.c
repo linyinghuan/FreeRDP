@@ -316,7 +316,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 						Stream_Read_UINT32(s, length);
 						Stream_Read_UINT32(s, offset);
-						printf("================= read file %d %s %d\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId);
+						printf("================= read file %d %s %d %d\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId, offset);
 						if(CompletionId < auditor_ctx->g_readFileMaxCompId) {
 							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
 						} else {
@@ -433,7 +433,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 
 		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
-		printf("++++++++++++++ read file data:[%s] len[%d] status[%d]\n", file_path, length, IoStatus);
+		printf("++++++++++++++ read file data:[%s] offset[%d], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
 		fp = fopen(file_path,"a");
 
 		fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
