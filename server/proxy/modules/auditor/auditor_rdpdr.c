@@ -306,7 +306,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							}
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
-						printf("================= read file %d %s\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath);
+						printf("================= read file %d %s %d\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId);
 						auditor_ctx->g_readFileCompId = CompletionId;
 						if(auditor_ctx->g_readFileNeed == true) {
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
@@ -398,7 +398,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 	Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
-	//printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
+	printf("---------------------rdpdr_server_Event  CompletionId:[%x] IoStatus:[%x]-----------------\n", CompletionId, IoStatus);
 
 	if (auditor_ctx->g_createNewFileNeed) {
 		auditor_ctx->g_createNewFileNeed = false;
