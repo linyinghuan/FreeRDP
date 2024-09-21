@@ -85,7 +85,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 		return;
 	Stream_Read_UINT16(s, component); /* Component (2 bytes) */
 	Stream_Read_UINT16(s, packetId);  /* PacketId (2 bytes) */
-	if (component == 0x4472 /*RDPDR_CTYP_CORE*/) {
+	if (component == RDPDR_CTYP_CORE /*RDPDR_CTYP_CORE*/) {
 		switch (packetId)
 		{
 			case PAKID_CORE_SERVER_ANNOUNCE:
@@ -325,24 +325,26 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		}
 	}
 
-	if(auditor_ctx->g_readFileDatasNeed == true) {
-		UINT32 length;
-		char file_path[1024] = {0};
-		FILE* fp = NULL;
+	if(msgRDPDRCTYP == RDPDR_CTYP_CORE && msgRDPDRPAKID == PAKID_CORE_DEVICE_IOCOMPLETION) {
+		if(auditor_ctx->g_readFileDatasNeed == true) {
+			UINT32 length;
+			char file_path[1024] = {0};
+			FILE* fp = NULL;
 
-		Stream_Read_UINT32(s, length);
+			Stream_Read_UINT32(s, length);
 
 
-		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
-		printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
-		fp = fopen(file_path,"r+");
+			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
+			printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
+			fp = fopen(file_path,"r+");
 
-		fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
-		if(fp) {
-			fwrite(s->pointer, length, 1, fp);
-			fclose(fp);				
-		}
-		//auditor_ctx->g_readFileDatasNeed = false;
+			fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
+			if(fp) {
+				fwrite(s->pointer, length, 1, fp);
+				fclose(fp);				
+			}
+			//auditor_ctx->g_readFileDatasNeed = false;
+		}		
 	}
 
 	return;
