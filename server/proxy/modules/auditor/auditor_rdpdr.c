@@ -326,13 +326,13 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	}
 
 	if(msgRDPDRCTYP == 0x4472 && msgRDPDRPAKID == PAKID_CORE_DEVICE_IOCOMPLETION) {
-		if(auditor_ctx->g_readFileDatasNeed == true) {
+		if(auditor_ctx->g_readFileDatasNeed == true && 
+			*(auditor_ctx->g_readFileOffset + CompletionId) != (-1L)) {
 			UINT32 length;
 			char file_path[1024] = {0};
 			FILE* fp = NULL;
 
 			Stream_Read_UINT32(s, length);
-
 
 			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
 			printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
@@ -343,6 +343,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 				fwrite(s->pointer, length, 1, fp);
 				fclose(fp);				
 			}
+			*(auditor_ctx->g_readFileOffset + CompletionId) = (-1L);
 			//auditor_ctx->g_readFileDatasNeed = false;
 		}		
 	}
