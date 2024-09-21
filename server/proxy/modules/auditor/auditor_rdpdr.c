@@ -314,7 +314,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 	Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
-	printf("---------------------rdpdr_server_Event msgRDPDRCTYP[%lx] msgRDPDRPAKID[%lx] CompletionId:[%x] IoStatus:[%x]-----------------\n", msgRDPDRCTYP, msgRDPDRCTYP, CompletionId, IoStatus);
+	printf("---------------------rdpdr_server_Event msgRDPDRCTYP[%lx] msgRDPDRPAKID[%lx] CompletionId:[%x] IoStatus:[%x]-----------------\n", msgRDPDRCTYP, msgRDPDRPAKID, CompletionId, IoStatus);
 
 	if (auditor_ctx->g_createNewFileNeed) {
 		auditor_ctx->g_createNewFileNeed = false;
