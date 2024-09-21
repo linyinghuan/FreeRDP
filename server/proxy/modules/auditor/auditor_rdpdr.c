@@ -163,7 +163,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									return;
 								free(path2);
 
-								printf("================= create file %s\n", lpFileNameA);
+								printf("================= create file %s %lx %lx\n", lpFileNameA, CreateDisposition, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 
