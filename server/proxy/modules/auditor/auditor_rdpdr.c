@@ -152,6 +152,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 						path = (const WCHAR*)Stream_Pointer(s);
 						{
+
 							auditor_ctx->g_readFileDatasNeed = false;
 
 							if (PathLength > 0 && PathLength < s->length) {
@@ -161,6 +162,8 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								if (ConvertFromUnicode(CP_UTF8, 0, path2, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 									return;
 								free(path2);
+
+								printf("================= create file %s\n", lpFileNameA);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 
