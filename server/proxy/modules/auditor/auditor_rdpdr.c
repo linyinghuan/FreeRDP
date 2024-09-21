@@ -153,8 +153,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						path = (const WCHAR*)Stream_Pointer(s);
 						{
 
-							auditor_ctx->g_readFileDatasNeed = false;
-
 							if (PathLength > 0 && PathLength < s->length) {
 								WCHAR* path2 = (WCHAR*)calloc(PathLength + 1, sizeof(WCHAR));
 								memcpy(path2, path+1, PathLength-1);
@@ -183,6 +181,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									printf("----------------- request write file path:[%s]\n", auditor_ctx->g_writeFilePath);
 								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_READ) &&
 											 ((DesiredAccess&FILE_READ_DATA) || (DesiredAccess&FILE_READ_EA))){
+									auditor_ctx->g_readFileDatasNeed = false;
 									if(auditor_ctx->g_readFilePath)
 										free(auditor_ctx->g_readFilePath);
 									auditor_ctx->g_readFilePath = lpFileNameA;
