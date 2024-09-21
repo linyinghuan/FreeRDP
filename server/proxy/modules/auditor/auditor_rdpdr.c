@@ -85,7 +85,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 		return;
 	Stream_Read_UINT16(s, component); /* Component (2 bytes) */
 	Stream_Read_UINT16(s, packetId);  /* PacketId (2 bytes) */
-	if (component == RDPDR_CTYP_CORE /*RDPDR_CTYP_CORE*/) {
+	if (component == 0x4472 /*RDPDR_CTYP_CORE*/) {
 		switch (packetId)
 		{
 			case PAKID_CORE_SERVER_ANNOUNCE:
@@ -325,7 +325,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 		}
 	}
 
-	if(msgRDPDRCTYP == RDPDR_CTYP_CORE && msgRDPDRPAKID == PAKID_CORE_DEVICE_IOCOMPLETION) {
+	if(msgRDPDRCTYP == 0x4472 && msgRDPDRPAKID == PAKID_CORE_DEVICE_IOCOMPLETION) {
 		if(auditor_ctx->g_readFileDatasNeed == true) {
 			UINT32 length;
 			char file_path[1024] = {0};
