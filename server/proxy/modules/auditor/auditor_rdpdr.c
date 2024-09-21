@@ -180,6 +180,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(auditor_ctx->g_writeFilePath);
 									auditor_ctx->g_writeFilePath = lpFileNameA;
 									auditor_ctx->g_writeFileNeed = true;
+									printf("----------------- request write file path:[%s]\n", auditor_ctx->g_writeFilePath);
 								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_READ) &&
 											 ((DesiredAccess&FILE_READ_DATA) || (DesiredAccess&FILE_READ_EA))){
 									if(auditor_ctx->g_readFilePath)
@@ -191,6 +192,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 										free(auditor_ctx->g_readFileOffset);
 									auditor_ctx->g_readFileOffset = malloc(auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
 									memset(auditor_ctx->g_readFileOffset, 0, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
+									printf("----------------- request read file path:[%s]\n", auditor_ctx->g_readFilePath);
 								}
 
 								//free(lpFileNameA);
