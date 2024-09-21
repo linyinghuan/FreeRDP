@@ -210,9 +210,12 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 						if(auditor_ctx->g_readFileNeed == true) {
 							char file_path[1024] = {0};
+							FILE* fp = NULL;
 							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
 
-							remove(file_path);
+							fp = fopen(file_path,"w");
+							if(fp)
+								fclose(fp);
 
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
 							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_readFilePath);
@@ -328,7 +331,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 		sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
 		printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
-		fp = fopen(file_path,"a");
+		fp = fopen(file_path,"r+");
 
 		fseek(fp, *(auditor_ctx->g_readFileOffset + CompletionId), SEEK_SET);
 		if(fp) {
