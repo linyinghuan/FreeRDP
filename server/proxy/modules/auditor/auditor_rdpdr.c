@@ -190,7 +190,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									if(auditor_ctx->g_readFileOffset)
 										free(auditor_ctx->g_readFileOffset);
 									auditor_ctx->g_readFileOffset = malloc(auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
-									memset(auditor_ctx->g_readFileOffset, 0, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
+									memset(auditor_ctx->g_readFileOffset, 0xff, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
 									printf("----------------- request read file path:[%s]\n", auditor_ctx->g_readFilePath);
 								}
 
