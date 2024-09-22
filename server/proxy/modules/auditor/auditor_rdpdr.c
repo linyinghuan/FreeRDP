@@ -161,7 +161,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 									return;
 								free(path2);
 
-								printf("================= create file %s %lx %lx\n", lpFileNameA, CreateDisposition, DesiredAccess);
+								//printf("================= create file %s %lx %lx\n", lpFileNameA, CreateDisposition, DesiredAccess);
 
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 
@@ -229,12 +229,33 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
+						UINT32 length;
+						UINT64 offset;
+						char file_path[1024] = {0};
+						FILE* fp = NULL;
+
 						printf("================= write file %d %s\n", auditor_ctx->g_writeFileNeed, auditor_ctx->g_writeFilePath);
+						sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_writeFilePath);
 						if(auditor_ctx->g_writeFileNeed == true) {
 							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
 							auditor_ctx->g_writeFileNeed = false;
-
 							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_writeFilePath, 0, file_pos, pData->config->AuditorDumpFilePath);	
+							fp = fopen(file_path,"w");
+							if(fp)
+								fclose(fp);							
+						}
+
+						Stream_Read_UINT32(s, length);
+						Stream_Read_UINT64(s, offset);
+						Stream_Seek(s, 20);
+
+						printf("++++++++++++++ write file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, offset, length);
+						fp = fopen(file_path,"r+");
+
+						fseek(fp, offset, SEEK_SET);
+						if(fp) {
+							fwrite(s->pointer, length, 1, fp);
+							fclose(fp);				
 						}
 					} else if (MajorFunction == IRP_MJ_SET_INFORMATION) {
 						UINT32 FsInformationClass;
@@ -314,7 +335,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, DeviceId);       // DeviceId (4 bytes)
 	Stream_Read_UINT32(s, CompletionId);              // CompletionId (4 bytes)
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
-	printf("---------------------rdpdr_server_Event msgRDPDRCTYP[%lx] msgRDPDRPAKID[%lx] CompletionId:[%x] IoStatus:[%x]-----------------\n", msgRDPDRCTYP, msgRDPDRPAKID, CompletionId, IoStatus);
+	//printf("---------------------rdpdr_server_Event msgRDPDRCTYP[%lx] msgRDPDRPAKID[%lx] CompletionId:[%x] IoStatus:[%x]-----------------\n", msgRDPDRCTYP, msgRDPDRPAKID, CompletionId, IoStatus);
 
 	if (auditor_ctx->g_createNewFileNeed) {
 		auditor_ctx->g_createNewFileNeed = false;
