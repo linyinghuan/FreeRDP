@@ -199,10 +199,10 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						}
 					} else if (MajorFunction == IRP_MJ_READ) {
 						UINT32 length;
-						UINT32 offset;
+						UINT64 offset;
 
 						Stream_Read_UINT32(s, length);
-						Stream_Read_UINT32(s, offset);
+						Stream_Read_UINT64(s, offset);
 						printf("================= read file %d %s %d %ld\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId, offset);
 						if(CompletionId < auditor_ctx->g_readFileMaxCompId) {
 							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
@@ -249,7 +249,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						Stream_Read_UINT64(s, offset);
 						Stream_Seek(s, 20);
 
-						printf("++++++++++++++ write file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, offset, length);
+						printf("++++++++++++++ write file data:[%s] offset[%ld], len[%d]\n", file_path, offset, length);
 						fp = fopen(file_path,"r+");
 
 						fseek(fp, offset, SEEK_SET);
