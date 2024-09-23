@@ -415,7 +415,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
 					file_pos.x = (file_descriptor_array+i)->pointl.x;
 					file_pos.y = (file_descriptor_array+i)->pointl.y;
-					sprintf(file_path, "%s/%s", auditor_ctx->dump_file_path, lpFileNameA);
+					sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
 					if(mode == AUDITOR_SERVER)
 						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, file_path);
 					else
@@ -478,7 +478,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 				fwrite(s->pointer, dataLen-4 , 1, fp);
 				fclose(fp);				
 			}
-
 		}
 
 		printf("contents response with stream id:%x size:%ld\n", response.streamId, content_size);
