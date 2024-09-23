@@ -222,7 +222,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								fclose(fp);
 
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
-							tlog(TLOG_INFO, pData->session_id, 0, "[filesystem] download file: %s\n", auditor_ctx->g_readFilePath);
 
 							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, file_path);							
 							auditor_ctx->g_readFileNeed = false;

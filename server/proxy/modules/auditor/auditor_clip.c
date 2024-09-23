@@ -409,7 +409,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 						goto finish;
 					printf("%s\n", lpFileNameA);
-					tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy FILE: %s n", lpFileNameA);
 					file_size = (file_descriptor_array+i)->nFileSizeHigh;
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
 					file_pos.x = (file_descriptor_array+i)->pointl.x;
