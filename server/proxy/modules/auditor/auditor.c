@@ -83,10 +83,10 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	char *event_text;
 
 	printf("produce text event type:%d sid:%s text:%s", event_type, sid, text);
-	if(event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD || event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD)
-		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %s\n", text);
+	if(event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD || event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD)
+		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %s", text);
 	else
-		tlog(TLOG_INFO, sid, 0, "[keyboard] copy UNICODETEXT: %s\n", text);
+		tlog(TLOG_INFO, sid, 0, "[keyboard] copy UNICODETEXT: %s", text);
 
 	event = malloc(sizeof(jms_auditor_event));
 	if(!event)
@@ -130,10 +130,10 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	char *event_file_name;
 
 	printf("produce file event type:%d sid:%s file name:%s file path:%s\n", event_type, sid, file_name, file_path);
-	if(event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD || event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD)
-		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %s\n", file_name);
+	if(event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD || event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD)
+		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %sn", file_name);
 	else
-		tlog(TLOG_INFO, sid, 0, "[rdpdr] copy UNICODETEXT: %s\n", file_name);
+		tlog(TLOG_INFO, sid, 0, "[rdpdr] copy UNICODETEXT: %s", file_name);
 
 	if(!sid) {
 		printf("sid is NULL\n");
