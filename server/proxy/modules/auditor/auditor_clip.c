@@ -384,7 +384,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			if (ConvertFromUnicode(CP_UTF8, 0, (LPCWSTR)s->pointer, -1, &lpCopyA, 0, NULL, NULL) < 1)
 				goto finish;
 			printf("cliboard_filter_server_Event C++ demo plugin: CF_UNICODETEXT:%s\n", lpCopyA);
-			tlog(TLOG_INFO, pData->session_id, 0, "[clipboard] copy UNICODETEXT: %s\n", lpCopyA);
 			if(mode == AUDITOR_SERVER)
 				auditor_text_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, lpCopyA);
 			else
