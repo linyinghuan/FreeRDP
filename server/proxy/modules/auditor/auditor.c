@@ -131,7 +131,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 
 	printf("produce file event type:%d sid:%s file name:%s file path:%s\n", event_type, sid, file_name, file_path);
 	if(event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD || event_type == AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD)
-		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %sn", file_name);
+		tlog(TLOG_INFO, sid, 0, "[clipboard] copy UNICODETEXT: %s", file_name);
 	else
 		tlog(TLOG_INFO, sid, 0, "[rdpdr] copy UNICODETEXT: %s", file_name);
 
