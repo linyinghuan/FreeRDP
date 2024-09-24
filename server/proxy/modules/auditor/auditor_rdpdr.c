@@ -223,7 +223,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
 
-							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, file_path);							
+							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);							
 							auditor_ctx->g_readFileNeed = false;
 							auditor_ctx->g_readFileDatasNeed = true;
 						}
@@ -240,7 +240,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
 							auditor_ctx->g_writeFileNeed = false;
 
-							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_writeFilePath, 0, file_pos, file_path);	
+							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_writeFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);	
 							fp = fopen(file_path,"w");
 							if(fp)
 								fclose(fp);							
@@ -286,7 +286,7 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 
 								printf("++++++++++++++ rename file new name %s\n", lpFileNameA);
 								sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
-								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, lpFileNameA, 0, file_pos, file_path);						
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, lpFileNameA, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);						
 							}	
 						}
 				
@@ -347,7 +347,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 			printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
 			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_createNewFilePath);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, file_path);
+			auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
 		}
 	}
 
