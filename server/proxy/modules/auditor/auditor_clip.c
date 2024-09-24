@@ -395,7 +395,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			FILEDESCRIPTORW* file_descriptor_array;
 			UINT32 file_descriptor_count;
 			UINT64 file_size;
-			jms_auditor_point file_pos;
 
 			UINT result = auditor_parse_file_list(s->pointer, dataLen, &file_descriptor_array, &file_descriptor_count);
 
@@ -404,8 +403,6 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 				printf("cliboard_filter_server_Event C++ demo plugin: CB_FORMAT_TEXTURILIST:\n");
 
 				for (int i = 0; i< file_descriptor_count; i++) {
-					char file_path[1024] = {0};
-
 					if (ConvertFromUnicode(CP_UTF8, 0, (file_descriptor_array+i)->cFileName, -1, &lpFileNameA, 0, NULL, NULL) < 1)
 						goto finish;
 					printf("%s\n", lpFileNameA);
@@ -413,7 +410,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
 					auditor_ctx->clip_file_size = file_size;
 					auditor_ctx->clip_file_name = lpFileNameA;
-					auditor_ctx->clip_file_data_len = file_size;
+					auditor_ctx->clip_mode = mode;
 				}
 			}
 		} 
@@ -461,8 +458,8 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		Stream_Read_UINT32(s, response.streamId);
 
 		if(request.dwFlags == 0x1) {
-			Stream_Read_UINT64(s, content_size;);
-			auditor_ctx->clip_file_length = content_size;
+			Stream_Read_UINT64(s, content_size);
+			auditor_ctx->clip_file_data_len = content_size;
 		} else {
 			char file_path[1024] = {0};
 			jms_auditor_point file_pos = {0};
