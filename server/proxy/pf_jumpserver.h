@@ -76,10 +76,17 @@ typedef struct {
 	jms_auditor_point pos;
 } jms_auditor_mouse_data;
 
+typedef enum {
+	AUDITOR_IO_STATUS_SUCCESS = 0,
+	AUDITOR_IO_STATUS_FAIL,
+	AUDITOR_IO_STATUS_MAX
+} jms_auditor_io_status;
+
 typedef struct {
 	char* 	file_name;
 	UINT64	file_size;
 	jms_auditor_point 	file_pos;
+	jms_auditor_io_status  file_io_status;
 	char * 	backup_path;
 } jms_auditor_file_data;
 

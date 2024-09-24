@@ -50,6 +50,10 @@ typedef struct {
 	CLIPRDR_FORMAT_LIST formatList;
 	wStream* clip_stream;
 	wStream* clip_client_stream;
+	UINT32 clip_mode;
+	char* clip_file_name;
+	UINT64 clip_file_size;
+	UINT64 clip_file_data_len; 
 
 	/* rdpdr data */
 	wStream* rdpdr_client_stream;
@@ -77,7 +81,7 @@ void* auditor_get_plugin_data(proxyData* pData);
 
 void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, char *text);
 void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
-								UINT64 file_size, jms_auditor_point file_pos, char *file_path);
+								UINT64 file_size, jms_auditor_point file_pos, char *file_path, jms_auditor_io_status status);
 void auditor_mouse_event_produce(jms_auditor_event_type event_type, char *sid, jms_auditor_mouse_op op_code, jms_auditor_point pos);
 
 #define TAG MODULE_TAG("auditor")

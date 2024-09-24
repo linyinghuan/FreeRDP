@@ -122,7 +122,7 @@ void auditor_text_event_produce(jms_auditor_event_type event_type, char *sid, ch
 }
 
 void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, char *file_name,
-								UINT64 file_size, jms_auditor_point file_pos, char *file_path)
+								UINT64 file_size, jms_auditor_point file_pos, char *file_path, jms_auditor_io_status status)
 {
 	jms_auditor_event *event;
 	jms_auditor_file_data *event_data;

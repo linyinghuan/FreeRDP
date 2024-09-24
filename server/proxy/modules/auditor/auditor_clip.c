@@ -411,13 +411,9 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					printf("%s\n", lpFileNameA);
 					file_size = (file_descriptor_array+i)->nFileSizeHigh;
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
-					file_pos.x = (file_descriptor_array+i)->pointl.x;
-					file_pos.y = (file_descriptor_array+i)->pointl.y;
-					sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
-					if(mode == AUDITOR_SERVER)
-						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, file_path);
-					else
-						auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, lpFileNameA, file_size, file_pos, file_path);					
+					auditor_ctx->clip_file_size = file_size;
+					auditor_ctx->clip_file_name = lpFileNameA;
+					auditor_ctx->clip_file_data_len = file_size;
 				}
 			}
 		} 
@@ -465,9 +461,11 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 		Stream_Read_UINT32(s, response.streamId);
 
 		if(request.dwFlags == 0x1) {
-			Stream_Read_UINT64(s, content_size);
+			Stream_Read_UINT64(s, content_size;);
+			auditor_ctx->clip_file_length = content_size;
 		} else {
 			char file_path[1024] = {0};
+			jms_auditor_point file_pos = {0};
 
 			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
 			FILE* fp=fopen(file_path,"a");
@@ -475,6 +473,21 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			if(fp) {
 				fwrite(s->pointer, dataLen-4 , 1, fp);
 				fclose(fp);				
+			}
+
+			auditor_ctx->clip_file_data_len = auditor_ctx->clip_file_data_len - (dataLen-4);
+			if(0 == auditor_ctx->clip_file_data_len) {
+				if(auditor_ctx->clip_mode == AUDITOR_SERVER)
+					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
+						auditor_ctx->clip_file_size, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
+				else
+					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
+						auditor_ctx->clip_file_size, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
+
+				free(auditor_ctx->clip_file_name);
+				auditor_ctx->clip_file_name = NULL;
+				auditor_ctx->clip_file_size = 0;
+				auditor_ctx->clip_file_data_len = 0;			
 			}
 		}
 
