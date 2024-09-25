@@ -66,7 +66,7 @@ typedef struct {
 	UINT32 	 rdpdr_file_status;
 	UINT32 	 rdpdr_io_status;
 	char*	 rdpdr_file_path;
-	bool g_createNewFileNeed;
+	bool g_createFileNeed;
 	bool g_writeFileNeed;
 	bool g_readFileNeed;
 	UINT32 g_readFileMaxCompId;

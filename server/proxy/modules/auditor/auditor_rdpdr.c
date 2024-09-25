@@ -390,7 +390,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 				fclose(fp);				
 			}
 			*(auditor_ctx->g_readFileOffset + CompletionId) = (-1L);
-		} else if(auditor_ctx->rdpdr_file_status == FILE_STATUS_CREATE || uditor_ctx->rdpdr_file_status == FILE_STATUS_WIRTE)	{
+		} else if(auditor_ctx->rdpdr_file_status == FILE_STATUS_CREATE || auditor_ctx->rdpdr_file_status == FILE_STATUS_WIRTE)	{
 			auditor_ctx->g_readFileOffset = IoStatus;
 		}
 	}
