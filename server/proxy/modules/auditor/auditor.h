@@ -38,7 +38,7 @@ typedef struct  {
 #define FILE_STATUS_NULL 		0
 #define FILE_STATUS_CREATE 		1
 #define FILE_STATUS_READ		2
-#define FILE_STATUS_WIRTE		3
+#define FILE_STATUS_WRITE		3
 
 typedef struct {
 	char dump_file_path[512];
