@@ -197,7 +197,9 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								//free(lpFileNameA);
 							}
 						}
-					} else if (MajorFunction == IRP_MJ_READ) {
+					} else if (MajorFunction == IRP_MJ_CLOSE) {
+						printf("!!!!!!!!!!!!!!!!!!!!!! close file\n");						
+					}else if (MajorFunction == IRP_MJ_READ) {
 						UINT32 length;
 						UINT64 offset;
 
