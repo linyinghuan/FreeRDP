@@ -175,6 +175,7 @@ void auditor_file_event_produce(jms_auditor_event_type event_type, char *sid, ch
 	event_data->file_size = file_size;
 	event_data->file_pos = file_pos;
 	event_data->backup_path = file_path;
+	event_data->file_io_status = status;
 
 	event->sid = event_sid;
 	event->user_name = NULL;
