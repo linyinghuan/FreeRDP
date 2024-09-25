@@ -35,6 +35,11 @@ typedef struct  {
 	AUDITOR_RDPDR_PATH_TABLE_NODE *node;
 } AUDITOR_RDPDR_PATH_TABLE_HEAD;
 
+#define FILE_STATUS_NULL 		0
+#define FILE_STATUS_CREATE 		1
+#define FILE_STATUS_READ		2
+#define FILE_STATUS_WIRTE		3
+
 typedef struct {
 	char dump_file_path[512];
 
@@ -58,22 +63,14 @@ typedef struct {
 	/* rdpdr data */
 	wStream* rdpdr_client_stream;
 	wStream* rdpdr_server_stream;
-	UINT32 g_FsInformationClass;
-	bool g_need;
+	UINT32 	 rdpdr_file_status;
+	UINT32 	 rdpdr_io_status;
+	char*	 rdpdr_file_path;
 	bool g_createNewFileNeed;
-	char *g_createNewFilePath;
 	bool g_writeFileNeed;
-	char *g_writeFilePath;
 	bool g_readFileNeed;
-	char *g_readFilePath;
-	bool g_readFileDatasNeed;
 	UINT32 g_readFileMaxCompId;
 	UINT64 *g_readFileOffset;	
-	UINT32 g_createNewFileAttributes;
-	char *g_newPath;
-	AUDITOR_RDPDR_PATH_TABLE_HEAD g_rdpdrpath;
-	AUDITOR_RDPDR_PATH_LIST_HEAD  g_rdpdrpath_list;
-
 } AUDITOR_CTX_DATA;
 
 BOOL auditor_set_plugin_data(proxyData* pData, void* data);

@@ -166,46 +166,85 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 								//https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea
 
 								if((CreateDisposition == 1 || CreateDisposition == 2) && ((DesiredAccess & 0x00000004) || (DesiredAccess & 0x00000002))) {
-									if(auditor_ctx->g_createNewFilePath)
-										free(auditor_ctx->g_createNewFilePath);
-									auditor_ctx->g_createNewFilePath = lpFileNameA;
-									auditor_ctx->g_createNewFileAttributes = FileAttributes;
-									auditor_ctx->g_createNewFileNeed = true;	
-									printf("----------------- request create file path:[%s]\n", auditor_ctx->g_createNewFilePath);								
+									auditor_ctx->g_createFileNeed = true;
+									if(auditor_ctx->rdpdr_file_path)
+										free(auditor_ctx->rdpdr_file_path);
+									auditor_ctx->rdpdr_file_status = FILE_STATUS_CREATE;
+									auditor_ctx->rdpdr_file_path = lpFileNameA;
+									printf("----------------- request create file path:[%s]\n", auditor_ctx->rdpdr_file_path);								
 								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_WRITE) &&
 											 ((DesiredAccess&FILE_WRITE_DATA) || (DesiredAccess&FILE_WRITE_EA))){
-									if(auditor_ctx->g_writeFilePath)
-										free(auditor_ctx->g_writeFilePath);
-									auditor_ctx->g_writeFilePath = lpFileNameA;
 									auditor_ctx->g_writeFileNeed = true;
-									printf("----------------- request write file path:[%s]\n", auditor_ctx->g_writeFilePath);
+									if(auditor_ctx->rdpdr_file_path)
+										free(auditor_ctx->rdpdr_file_path);
+									auditor_ctx->rdpdr_file_status = FILE_STATUS_WRITE;
+									auditor_ctx->rdpdr_file_path = lpFileNameA;									
+									printf("----------------- request write file path:[%s]\n", auditor_ctx->rdpdr_file_path);
 								} else if((DesiredAccess & SYNCHRONIZE) && (DesiredAccess & STANDARD_RIGHTS_READ) &&
 											 ((DesiredAccess&FILE_READ_DATA) || (DesiredAccess&FILE_READ_EA))){
-									auditor_ctx->g_readFileDatasNeed = false;
-									if(auditor_ctx->g_readFilePath)
-										free(auditor_ctx->g_readFilePath);
-									auditor_ctx->g_readFilePath = lpFileNameA;
 									auditor_ctx->g_readFileNeed = true;
+									if(auditor_ctx->rdpdr_file_path)
+										free(auditor_ctx->rdpdr_file_path);
+									auditor_ctx->rdpdr_file_status = FILE_STATUS_READ;
+									auditor_ctx->rdpdr_file_path = lpFileNameA;										
+
 									auditor_ctx->g_readFileMaxCompId = 32;
 									if(auditor_ctx->g_readFileOffset)
 										free(auditor_ctx->g_readFileOffset);
 									auditor_ctx->g_readFileOffset = malloc(auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
 									memset(auditor_ctx->g_readFileOffset, 0xff, auditor_ctx->g_readFileMaxCompId*sizeof(UINT64));
-									printf("----------------- request read file path:[%s]\n", auditor_ctx->g_readFilePath);
+									printf("----------------- request read file path:[%s]\n", auditor_ctx->rdpdr_file_path);
 								}
 
 								//free(lpFileNameA);
 							}
 						}
 					} else if (MajorFunction == IRP_MJ_CLOSE) {
-						printf("!!!!!!!!!!!!!!!!!!!!!! close file\n");						
+						if (auditor_ctx->rdpdr_file_status == FILE_STATUS_CREATE) {
+							char file_path[1024] = {0};
+
+							printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->rdpdr_file_path);
+							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
+							if(auditor_ctx->rdpdr_io_status == 0)
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
+							else
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_FAIL);														
+						} else if (auditor_ctx->rdpdr_file_status == FILE_STATUS_READ) {
+							char file_path[1024] = {0};
+
+							printf("++++++++++++++ read file path:[%s]\n", auditor_ctx->rdpdr_file_path);
+							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
+							if(auditor_ctx->rdpdr_io_status == 0)
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
+							else
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_FAIL);														
+						} else if (auditor_ctx->rdpdr_file_status == FILE_STATUS_WRITE) {
+							char file_path[1024] = {0};
+
+							printf("++++++++++++++ write file path:[%s]\n", auditor_ctx->rdpdr_file_path);
+							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
+							if(auditor_ctx->rdpdr_io_status == 0)
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
+							else
+								auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, 
+									auditor_ctx->rdpdr_file_path, 0, file_pos, file_path, AUDITOR_IO_STATUS_FAIL);														
+						}
+
+						free(auditor_ctx->rdpdr_file_path);
+						auditor_ctx->rdpdr_file_status = FILE_STATUS_NULL;
+						auditor_ctx->rdpdr_file_path = NULL;	
 					}else if (MajorFunction == IRP_MJ_READ) {
 						UINT32 length;
 						UINT64 offset;
 
 						Stream_Read_UINT32(s, length);
 						Stream_Read_UINT64(s, offset);
-						printf("================= read file %d %s %d %ld\n", auditor_ctx->g_readFileNeed, auditor_ctx->g_readFilePath, CompletionId, offset);
+						printf("================= read file %d %s %d %ld\n", auditor_ctx->rdpdr_file_status, auditor_ctx->rdpdr_file_path, CompletionId, offset);
 						if(CompletionId < auditor_ctx->g_readFileMaxCompId) {
 							*(auditor_ctx->g_readFileOffset + CompletionId) = offset;
 						} else {
@@ -217,17 +256,11 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						if(auditor_ctx->g_readFileNeed == true) {
 							char file_path[1024] = {0};
 							FILE* fp = NULL;
-							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
+							sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
 
 							fp = fopen(file_path,"w");
 							if(fp)
 								fclose(fp);
-
-							printf("++++++++++++++ download file path:[%s]\n", auditor_ctx->g_readFilePath);
-
-							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_DOWNLOAD, pData->ps->uuid, auditor_ctx->g_readFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);							
-							auditor_ctx->g_readFileNeed = false;
-							auditor_ctx->g_readFileDatasNeed = true;
 						}
 						
 					} else if (MajorFunction == IRP_MJ_WRITE) {
@@ -236,13 +269,11 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						char file_path[1024] = {0};
 						FILE* fp = NULL;
 
-						printf("================= write file %d %s\n", auditor_ctx->g_writeFileNeed, auditor_ctx->g_writeFilePath);
-						sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_writeFilePath);
+						printf("================= write file %d %s\n", auditor_ctx->rdpdr_file_status, auditor_ctx->rdpdr_file_path);
+						sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
 						if(auditor_ctx->g_writeFileNeed == true) {
-							printf("++++++++++++++ upload file path:[%s]\n", auditor_ctx->g_writeFilePath);
 							auditor_ctx->g_writeFileNeed = false;
 
-							auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_writeFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);	
 							fp = fopen(file_path,"w");
 							if(fp)
 								fclose(fp);							
@@ -251,8 +282,6 @@ void auditor_rdpdr_client_event_handler(proxyData* pData, proxyChannelDataEventI
 						Stream_Read_UINT32(s, length);
 						Stream_Read_UINT64(s, offset);
 						Stream_Seek(s, 20);
-
-						printf("++++++++++++++ write file data:[%s] offset[%ld], len[%d]\n", file_path, offset, length);
 						fp = fopen(file_path,"r+");
 
 						fseek(fp, offset, SEEK_SET);
@@ -342,19 +371,8 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 	Stream_Read_UINT32(s, IoStatus);                              // IoStatus (4 bytes)
 	//printf("---------------------rdpdr_server_Event msgRDPDRCTYP[%lx] msgRDPDRPAKID[%lx] CompletionId:[%x] IoStatus:[%x]-----------------\n", msgRDPDRCTYP, msgRDPDRPAKID, CompletionId, IoStatus);
 
-	if (auditor_ctx->g_createNewFileNeed) {
-		auditor_ctx->g_createNewFileNeed = false;
-		if (IoStatus == 0) {
-			char file_path[1024] = {0};
-
-			printf("++++++++++++++ create file path:[%s]\n", auditor_ctx->g_createNewFilePath);
-			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_createNewFilePath);
-			auditor_file_event_produce(AUDITOR_EVENT_TYPE_FILESYS_UPLOAD, pData->ps->uuid, auditor_ctx->g_createNewFilePath, 0, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
-		}
-	}
-
 	if(msgRDPDRCTYP == 0x4472 && msgRDPDRPAKID == PAKID_CORE_DEVICE_IOCOMPLETION) {
-		if(auditor_ctx->g_readFileDatasNeed == true && 
+		if(auditor_ctx->rdpdr_file_status == FILE_STATUS_READ && 
 			*(auditor_ctx->g_readFileOffset + CompletionId) != (-1L)) {
 			UINT32 length;
 			char file_path[1024] = {0};
@@ -362,7 +380,7 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 
 			Stream_Read_UINT32(s, length);
 
-			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->g_readFilePath);
+			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->rdpdr_file_path);
 			printf("++++++++++++++ read file data:[%s] offset[%ld], len[%d] status[%d]\n", file_path, *(auditor_ctx->g_readFileOffset + CompletionId), length, IoStatus);
 			fp = fopen(file_path,"r+");
 
@@ -372,8 +390,9 @@ void auditor_rdpdr_server_event_handler(proxyData* pData, proxyChannelDataEventI
 				fclose(fp);				
 			}
 			*(auditor_ctx->g_readFileOffset + CompletionId) = (-1L);
-			//auditor_ctx->g_readFileDatasNeed = false;
-		}		
+		} else if(auditor_ctx->rdpdr_file_status == FILE_STATUS_CREATE || uditor_ctx->rdpdr_file_status == FILE_STATUS_WIRTE)	{
+			auditor_ctx->g_readFileOffset = IoStatus;
+		}
 	}
 
 	return;
