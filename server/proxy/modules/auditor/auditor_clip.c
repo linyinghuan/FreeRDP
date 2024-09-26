@@ -300,9 +300,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 	UINT16 msgFlags;
 	UINT32 dataLen;
 	UINT error;
-	static CLIPRDR_FILE_CONTENTS_REQUEST request = {0};
-	static CLIPRDR_FILE_CONTENTS_RESPONSE response = {0};
-	static LPSTR lpFileNameA;
+	LPSTR lpFileNameA;
 
 	
 	if (pEvent->flags & CHANNEL_FLAG_FIRST)
@@ -409,6 +407,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 					file_size = (file_descriptor_array+i)->nFileSizeHigh;
 					file_size = (file_size << 32) |  (file_descriptor_array+i)->nFileSizeLow;
 					auditor_ctx->clip_file_size = file_size;
+					auditor_ctx->clip_file_data_len = file_size;
 					auditor_ctx->clip_file_name = lpFileNameA;
 					auditor_ctx->clip_mode = mode;
 				}
@@ -426,21 +425,21 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			goto finish;
 		}
 
-		request.haveClipDataId = FALSE;
-		Stream_Read_UINT32(s, request.streamId);      /* streamId (4 bytes) */
-		Stream_Read_UINT32(s, request.listIndex);     /* listIndex (4 bytes) */
-		Stream_Read_UINT32(s, request.dwFlags);       /* dwFlags (4 bytes) */
-		Stream_Read_UINT32(s, request.nPositionLow);  /* nPositionLow (4 bytes) */
-		Stream_Read_UINT32(s, request.nPositionHigh); /* nPositionHigh (4 bytes) */
-		Stream_Read_UINT32(s, request.cbRequested);   /* cbRequested (4 bytes) */
+		auditor_ctx->request.haveClipDataId = FALSE;
+		Stream_Read_UINT32(s, auditor_ctx->request.streamId);      /* streamId (4 bytes) */
+		Stream_Read_UINT32(s, auditor_ctx->request.listIndex);     /* listIndex (4 bytes) */
+		Stream_Read_UINT32(s, auditor_ctx->request.dwFlags);       /* dwFlags (4 bytes) */
+		Stream_Read_UINT32(s, auditor_ctx->request.nPositionLow);  /* nPositionLow (4 bytes) */
+		Stream_Read_UINT32(s, auditor_ctx->request.nPositionHigh); /* nPositionHigh (4 bytes) */
+		Stream_Read_UINT32(s, auditor_ctx->request.cbRequested);   /* cbRequested (4 bytes) */
 
 		if (Stream_GetRemainingLength(s) >= 4)
 		{
-			Stream_Read_UINT32(s, request.clipDataId); /* clipDataId (4 bytes) */
-			request.haveClipDataId = TRUE;
+			Stream_Read_UINT32(s, auditor_ctx->request.clipDataId); /* clipDataId (4 bytes) */
+			auditor_ctx->request.haveClipDataId = TRUE;
 		}
 
-		printf("contents request with flag:%x\n stream id:%x\n", request.dwFlags, request.streamId);
+		printf("contents request with flag:%x\n stream id:%x\n", auditor_ctx->request.dwFlags, auditor_ctx->request.streamId);
 
 	}
 	else if (msgType == CB_FILECONTENTS_RESPONSE) {
@@ -455,16 +454,15 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			goto finish;
 		}
 
-		Stream_Read_UINT32(s, response.streamId);
+		Stream_Read_UINT32(s, auditor_ctx->response.streamId);
 
-		if(request.dwFlags == 0x1) {
+		if(auditor_ctx->request.dwFlags == 0x1) {
 			Stream_Read_UINT64(s, content_size);
-			auditor_ctx->clip_file_data_len = content_size;
 		} else {
 			char file_path[1024] = {0};
 			jms_auditor_point file_pos = {0};
 
-			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, lpFileNameA);
+			sprintf(file_path, "%s%s", auditor_ctx->dump_file_path, auditor_ctx->clip_file_name);
 			FILE* fp=fopen(file_path,"a");
 
 			if(fp) {
@@ -488,7 +486,7 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			}
 		}
 
-		printf("contents response with stream id:%x size:%ld\n", response.streamId, content_size);
+		printf("contents response with stream id:%x size:%ld\n", auditor_ctx->response.streamId, content_size);
 	}
 
 finish:

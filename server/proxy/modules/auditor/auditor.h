@@ -58,7 +58,9 @@ typedef struct {
 	UINT32 clip_mode;
 	char* clip_file_name;
 	UINT64 clip_file_size;
-	UINT64 clip_file_data_len; 
+	UINT64 clip_file_data_len;
+	CLIPRDR_FILE_CONTENTS_REQUEST request;
+	CLIPRDR_FILE_CONTENTS_RESPONSE response
 
 	/* rdpdr data */
 	wStream* rdpdr_client_stream;
