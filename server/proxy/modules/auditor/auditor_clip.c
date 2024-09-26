@@ -473,10 +473,10 @@ void auditor_clip_event_handler(UINT mode, proxyData* pData, proxyChannelDataEve
 			auditor_ctx->clip_file_data_len = auditor_ctx->clip_file_data_len - (dataLen-4);
 			if(0 == auditor_ctx->clip_file_data_len) {
 				if(auditor_ctx->clip_mode == AUDITOR_SERVER)
-					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
+					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
 						auditor_ctx->clip_file_size, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
 				else
-					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_UPLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
+					auditor_file_event_produce(AUDITOR_EVENT_TYPE_CLIPBOARD_DOWNLOAD, pData->ps->uuid, auditor_ctx->clip_file_name, 
 						auditor_ctx->clip_file_size, file_pos, file_path, AUDITOR_IO_STATUS_SUCCESS);
 
 				free(auditor_ctx->clip_file_name);
