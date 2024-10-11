@@ -13,13 +13,7 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		return TRUE;
 	}
 
-	if(NULL == pdata->ps->sid)
-		pdata->ps->sid = "test";
-
-	if(NULL == pdata->ps->uuid)
-		pdata->ps->uuid = "test-uuid";
-
-	printf("session %s server channel init\n", pdata->session_id);
+	printf("sessionxxxxx %s server channel init\n", pdata->session_id);
 
 	if(NULL == auditor_get_plugin_data(pdata)) {
 		auditor_ctx = malloc(sizeof(AUDITOR_CTX_DATA));
@@ -33,6 +27,9 @@ BOOL auditor_server_channels_init(proxyData* pdata)
 		printf("session file path:%s\n", auditor_ctx->dump_file_path);
 
 		mkdir(auditor_ctx->dump_file_path,0777);
+	} else {
+		printf("AuditorDumpEnable:%d\n", pdata->config->AuditorDumpFileEnable);
+		printf("AuditorDumpFilePath:%s\n", pdata->config->AuditorDumpFilePath);
 	}	
 
 	return TRUE;
